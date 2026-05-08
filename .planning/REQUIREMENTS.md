@@ -122,17 +122,71 @@ Explicit exclusions. Prevents scope creep and re-debate.
 
 ## Traceability
 
-Empty until roadmap maps each requirement to a phase. Populated by the roadmapper.
+Every v1 requirement maps to exactly one phase. Coverage validated.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| CORE-01 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Pending |
+| CORE-03 | Phase 1 | Pending |
+| CORE-04 | Phase 1 | Pending |
+| CORE-05 | Phase 1 | Pending |
+| CORE-06 | Phase 1 | Pending |
+| CHECK-01 | Phase 1 | Pending |
+| CHECK-02 | Phase 1 | Pending |
+| CHECK-03 | Phase 2 | Pending |
+| CHECK-04 | Phase 2 | Pending |
+| CHECK-05 | Phase 4 | Pending |
+| CHECK-06 | Phase 2 | Pending |
+| ACT-01 | Phase 1 | Pending |
+| ACT-02 | Phase 1 | Pending |
+| ACT-03 | Phase 1 | Pending |
+| ACT-04 | Phase 1 | Pending |
+| ACT-05 | Phase 1 | Pending |
+| ACT-06 | Phase 2 | Pending |
+| ACT-07 | Phase 2 | Pending |
+| ACT-08 | Phase 2 | Pending |
+| ACT-09 | Phase 2 | Pending |
+| ACT-10 | Phase 2 | Pending |
+| LLM-01 | Phase 4 | Pending |
+| LLM-02 | Phase 4 | Pending |
+| LLM-03 | Phase 4 | Pending |
+| LLM-04 | Phase 4 | Pending |
+| LLM-05 | Phase 4 | Pending |
+| LLM-06 | Phase 4 | Pending |
+| LLM-07 | Phase 4 | Pending |
+| LLM-08 | Phase 4 | Pending |
+| LLM-09 | Phase 4 | Pending |
+| BENCH-01 | Phase 3 | Pending |
+| BENCH-02 | Phase 3 | Pending |
+| BENCH-03 | Phase 3 | Pending |
+| BENCH-04 | Phase 3 | Pending |
+| BENCH-05 | Phase 3 | Pending |
+| BENCH-06 | Phase 3 | Pending |
+| BENCH-07 | Phase 3 | Pending |
+| DEMO-01 | Phase 5 | Pending |
+| DEMO-02 | Phase 5 | Pending |
+| DEMO-03 | Phase 5 | Pending |
+| DEMO-04 | Phase 5 | Pending |
+| DEMO-05 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 47 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 47 ⚠️ (will be resolved by roadmapper)
+- v1 requirements (itemized REQ-IDs): 43 total — CORE (6) + CHECK (6) + ACT (10) + LLM (9) + BENCH (7) + DEMO (5)
+- Mapped to phases: 43
+- Unmapped: 0
+
+> **Note on count:** The original instruction and PROJECT.md narrative referenced "47 v1 requirements" as an estimate; the itemized REQ-ID list in this document totals 43 unique IDs (CORE-01..06, CHECK-01..06, ACT-01..10, LLM-01..09, BENCH-01..07, DEMO-01..05). All 43 itemized REQ-IDs are mapped to exactly one phase. No orphans, no duplicates.
+
+**Per-phase breakdown:**
+- Phase 1 (Skeleton + Heuristic Spine + First Comment): 13 requirements — CORE-01..06, CHECK-01, CHECK-02, ACT-01..05
+- Phase 2 (Action Hardening + Repo-Awareness): 8 requirements — CHECK-03, CHECK-04, CHECK-06, ACT-06..10
+- Phase 3 (Benchmark + Heuristic Tuning): 7 requirements — BENCH-01..07
+- Phase 4 (LLM Adjudicator + Tier 3): 10 requirements — LLM-01..09, CHECK-05
+- Phase 5 (Demo & Submission): 5 requirements — DEMO-01..05
+- **Total: 13 + 8 + 7 + 10 + 5 = 43 ✓**
+
+**Coverage validated: 43/43 ✓**
 
 ---
 *Requirements defined: 2026-05-08*
-*Last updated: 2026-05-08 after initial definition*
+*Last updated: 2026-05-08 — traceability populated by roadmapper*
