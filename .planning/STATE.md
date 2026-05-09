@@ -18,12 +18,12 @@
 ## Current Position
 
 **Phase:** Phase 1 — Skeleton + Heuristic Spine + First Comment
-**Plan:** 01-01 complete; next: 01-02-dtos-stub
-**Status:** In Progress — Plan 01-01 (scaffold) complete
-**Progress:** 0/5 phases complete (Phase 1 in progress: 1/5 plans done)
+**Plan:** 01-02 complete; next: 01-03-heuristics
+**Status:** In Progress — Plan 01-02 (DTOs + stub) complete
+**Progress:** 0/5 phases complete (Phase 1 in progress: 2/5 plans done)
 
 ```
-[==        ] 20%  Phase 1 Plan 1/5 complete
+[====      ] 40%  Phase 1 Plan 2/5 complete
 ```
 
 ## Performance Metrics
@@ -39,7 +39,7 @@
 
 ## Accumulated Context
 
-### Key Decisions (carried from PROJECT.md)
+### Key Decisions (carried from PROJECT.md + Plan 02)
 - GitHub Action only — no CLI, App, or dashboard for v1
 - Checklist is the hero output; score is a secondary badge
 - Repo-aware checklist with 4-tier graceful-degradation fallback
@@ -50,6 +50,8 @@
 - Meta-nudge in comment when repo has no templates
 - Ship a precision/recall benchmark on real repo issues
 - Bring-your-own-key for LLM access
+- score() is synchronous (not async) — Phase 4 LLM async handled at adapter boundary
+- rollup.config.ts overrides outDir to 'dist' to satisfy @rollup/plugin-typescript path validation
 
 ### Architecture Spine (from research/ARCHITECTURE.md)
 - Hexagonal / ports-and-adapters
@@ -59,10 +61,11 @@
 - LLM is the LAST component wired so heuristics-only is shippable from Phase 1
 
 ### Active Todos
-- Execute Phase 1 Plan 02 (01-02-dtos-stub): Define all Phase 1 DTOs, stub score() entrypoint, first Rollup build of dist/index.js (Walking Skeleton Stage A).
+- Execute Phase 1 Plan 03 (01-03-heuristics): Implement extractSignals() heuristic extractor using unified/remark AST parsing.
 
 ### Completed Plans
 - **01-01-scaffold** (2026-05-09): Bootstrapped toolchain — Node 24, TypeScript 5.9, Rollup 4, Vitest 4.1.5, Biome 2.4.14; all Phase 1 deps installed; 2/2 smoke tests passing.
+- **01-02-dtos-stub** (2026-05-09): Locked all Phase 1 DTOs in src/core/types.ts (verbatim from SKELETON.md A6), LLMPort in src/core/llm/port.ts, stub score() with locked sync signature, first Rollup bundle dist/index.js (971KB, Walking Skeleton Stage A). 11/11 tests passing. Hexagonal invariant verified.
 
 ### Blockers
 None.
@@ -79,11 +82,11 @@ None.
 
 ## Session Continuity
 
-**Last action:** Plan 01-01-scaffold executed (2026-05-09). Toolchain bootstrapped: Vitest 4.1.5, Biome 2.4.14, Rollup 4, TypeScript NodeNext. 2/2 smoke tests passing.
-**Next action:** Execute Plan 01-02-dtos-stub — define DTOs, stub score(), first Rollup dist build.
-**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue". Plan 01-01 done; 4 plans remain in Phase 1.
+**Last action:** Plan 01-02-dtos-stub executed (2026-05-09). DTOs locked, score() stubbed, first dist build at 971KB. 11/11 tests passing.
+**Next action:** Execute Plan 01-03-heuristics — implement extractSignals() with unified/remark AST parsing.
+**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue". Plans 01-01 and 01-02 done; 3 plans remain in Phase 1.
 
 ---
 
 *State initialized: 2026-05-08*
-*Last updated: 2026-05-08 after roadmap creation*
+*Last updated: 2026-05-09 after Plan 01-02-dtos-stub*
