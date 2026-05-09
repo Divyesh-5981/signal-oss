@@ -1,0 +1,13 @@
+name: 'Signal-OSS Issue Triage'
+description: 'Scores GitHub issues for actionability and posts a missing-info checklist'
+author: 'Signal-OSS'
+
+# Phase 1: no inputs (added in Phase 2: dry-run, enable-comments, label-name, etc.)
+
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'check-square'
+  color: 'blue'

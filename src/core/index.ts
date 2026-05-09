@@ -3,12 +3,12 @@
 // PHASE 1: llm parameter is accepted but always passed null. Phase 4 wires it.
 // CRITICAL: This file MUST NOT import from @octokit, @actions, fs, https, or any LLM SDK.
 
-import { extractSignals } from './heuristics/extractor.js'
-import { classifyType } from './classifier/issue-type.js'
 import { generateChecklist } from './checklist/generator.js'
+import { classifyType } from './classifier/issue-type.js'
+import { extractSignals } from './heuristics/extractor.js'
+import type { LLMPort } from './llm/port.js'
 import { computeScore } from './score/compute.js'
 import type { Issue, RepoContext, ScoredIssue } from './types.js'
-import type { LLMPort } from './llm/port.js'
 
 export function score(
   issue: Issue,

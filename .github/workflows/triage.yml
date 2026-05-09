@@ -1,0 +1,21 @@
+name: Signal-OSS Issue Triage
+
+on:
+  issues:
+    types: [opened, reopened]
+
+# ACT-03: explicit minimal permissions (top-level default)
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    # ACT-04: workflow-level bot-loop guard (main.ts has a second guard).
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Triage issue
+        uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

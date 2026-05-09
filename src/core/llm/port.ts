@@ -1,4 +1,4 @@
-import type { Issue, Signals, RepoContext } from '../types.js'
+import type { Issue, RepoContext, Signals } from '../types.js'
 
 export interface LLMRequest {
   issue: Issue
