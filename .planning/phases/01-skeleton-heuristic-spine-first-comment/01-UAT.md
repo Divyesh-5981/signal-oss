@@ -1,5 +1,5 @@
 ---
-status: testing
+status: complete
 phase: 01-skeleton-heuristic-spine-first-comment
 source:
   - .planning/phases/01-skeleton-heuristic-spine-first-comment/01-01-SUMMARY.md
@@ -13,16 +13,10 @@ updated: 2026-05-09T00:00:00Z
 
 ## Current Test
 
-number: 5
-name: Local-Action Dry Run
-expected: |
-  Run the Action locally using the fixture event:
-    npx @github/local-action run . fixtures/event.json .env.local
-  Requires a real GITHUB_TOKEN in .env.local (fake tokens fail at postOrUpdateComment).
-  The action logs a score, issue type, tier, and comment ID to stdout (core.info calls).
-  The comment body dispatched contains `<!-- signal-oss:v1 -->`.
-  The process exits 0 (no core.setFailed call triggered).
-awaiting: user response
+number: 6
+name: Sandbox E2E — Live GitHub Comment
+result: pass
+completed: 2026-05-09T00:00:00Z
 
 ## Tests
 
@@ -68,12 +62,12 @@ result: pass
 ### 5. Local-Action Dry Run
 expected: |
   Run the Action locally using the fixture event:
-    npx @github/local-action run . fixtures/event.json .env.local
-  Requires a real GITHUB_TOKEN in .env.local pointing to a sandbox repo.
+    npm run local-action  (uses .env with real GITHUB_TOKEN)
   The action logs a score, issue type, tier, and comment ID to stdout (core.info calls).
   The comment body dispatched contains `<!-- signal-oss:v1 -->`.
   The process exits 0 (no core.setFailed call triggered).
-result: [pending — needs real GITHUB_TOKEN + sandbox repo]
+result: pass
+observed: "score=0, type=bug, tier=baseline, items=4, action=updated, commentId=4412378826, exit 0"
 
 ### 6. Sandbox E2E — Live GitHub Comment
 expected: |
@@ -84,15 +78,24 @@ expected: |
   - An "Actionability score: N/10" line (score expected ≤3 for this minimal issue)
   - The `<!-- signal-oss:v1 -->` marker at the end
   Reopening the same issue triggers an UPDATE to the existing comment (not a second comment).
-result: [pending]
+result: pass
+observed: |
+  Issue #8 opened on Divyesh-5981/signal-oss-sandbox (title: "it doesnt work", empty body).
+  Workflow run #7 completed/success in ~25s.
+  Comment posted:
+    - Friendly intro ("Thanks for opening this issue!")
+    - 4-item checklist (repro, version, error/stack, minimal example)
+    - Actionability score: 0/10
+    - Tip nudge
+    - <!-- signal-oss:v1 --> marker
 
 ## Summary
 
 total: 6
-passed: 4
+passed: 6
 issues: 0
 skipped: 0
-pending: 2
+pending: 0
 
 ## Gaps
 
