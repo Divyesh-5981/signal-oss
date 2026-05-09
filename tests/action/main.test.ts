@@ -48,9 +48,8 @@ beforeEach(() => {
 
 describe('main.ts orchestrator', () => {
   it('happy path: posts a new comment when no marker exists', async () => {
-    await import('../../src/action/main.js')
-    // run() is invoked at module top — wait a tick for the promise chain.
-    await new Promise((r) => setTimeout(r, 50))
+    const { run } = await import('../../src/action/main.js')
+    await run()
     expect(mockListComments).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: 'test-user', repo: 'signal-oss-sandbox', issue_number: 42, per_page: 100,
@@ -62,9 +61,4 @@ describe('main.ts orchestrator', () => {
     expect(callArg.body).toContain('Actionability score:')
     expect(mockSetFailed).not.toHaveBeenCalled()
   })
-
-  // Note: re-importing main.js in the same test process re-runs run() — vitest's module cache
-  // means only the first import fires run(). Bot-actor and missing-issue branches are exercised
-  // via the in-process logic and verified at the human-verify checkpoint (Task 3).
-  // Phase 2 may export run() for cleaner isolation.
 })

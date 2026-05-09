@@ -3,7 +3,7 @@ import nodeResolve from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 
 export default {
-  input: 'src/action/main.ts',
+  input: 'src/action/index.ts',
   output: {
     esModule: true,
     file: 'dist/index.js',

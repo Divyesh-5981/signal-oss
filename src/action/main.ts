@@ -9,7 +9,7 @@ import { format } from '../core/format/markdown.js'
 import { score } from '../core/index.js'
 import type { Issue, RepoContext } from '../core/types.js'
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   // ACT-04: belt-and-suspenders bot-loop guard (workflow YAML has its own if: condition).
   if (github.context.actor === 'github-actions[bot]') {
     core.info('Skipping — triggered by github-actions[bot] actor (bot-loop guard).')
@@ -61,7 +61,3 @@ async function run(): Promise<void> {
       `tier=${scored.tierUsed}, items=${scored.items.length}).`,
   )
 }
-
-run().catch((err) => {
-  core.setFailed(err instanceof Error ? err.message : String(err))
-})

@@ -48810,6 +48810,7 @@ async function run() {
         `(commentId=${result.commentId}, score=${scored.score}, type=${scored.issueType}, ` +
         `tier=${scored.tierUsed}, items=${scored.items.length}).`);
 }
+
 run().catch((err) => {
     setFailed(err instanceof Error ? err.message : String(err));
 });

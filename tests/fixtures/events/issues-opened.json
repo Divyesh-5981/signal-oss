@@ -1,19 +1,19 @@
 {
   "action": "opened",
   "issue": {
-    "number": 42,
+    "number": 1,
     "title": "App crashes on login",
     "body": "I get an error when I click the login button. Please fix.",
     "state": "open",
     "labels": [],
-    "user": { "login": "test-user", "type": "User", "id": 1 }
+    "user": { "login": "Divyesh-5981", "type": "User", "id": 1 }
   },
   "repository": {
     "id": 1,
     "name": "signal-oss-sandbox",
-    "full_name": "test-user/signal-oss-sandbox",
-    "owner": { "login": "test-user", "type": "User", "id": 1 },
+    "full_name": "Divyesh-5981/signal-oss-sandbox",
+    "owner": { "login": "Divyesh-5981", "type": "User", "id": 1 },
     "private": false
   },
-  "sender": { "login": "test-user", "type": "User", "id": 1 }
+  "sender": { "login": "Divyesh-5981", "type": "User", "id": 1 }
 }
