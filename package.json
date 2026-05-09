@@ -11,8 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "lint": "biome check src",
-    "format": "biome format --write src",
+    "lint": "biome check --no-errors-on-unmatched src",
+    "format": "biome format --write --no-errors-on-unmatched src",
     "all": "npm run format && npm run lint && npm run test && npm run package",
     "local-action": "npx @github/local-action run . src/action/main.ts .env"
   },
