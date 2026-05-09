@@ -48697,10 +48697,11 @@ function extractSignals(issue) {
     visit(tree, 'text', (n) => {
         textBlob += ` ${n.value}`;
     });
+    const codeBlob = codeNodes.map((n) => n.value).join(' ');
     const hasCodeBlock = codeNodes.length > 0;
-    const hasStackTrace = codeNodes.some((n) => (!n.lang || n.lang.length === 0) && STACK_TRACE_REGEX.test(n.value));
+    const hasStackTrace = codeNodes.some((n) => STACK_TRACE_REGEX.test(n.value)) || STACK_TRACE_REGEX.test(textBlob);
     const hasMinimalExample = codeNodes.some((n) => n.lang !== null && n.lang !== undefined && n.lang.length > 0);
-    const hasVersionMention = VERSION_REGEX.test(textBlob);
+    const hasVersionMention = VERSION_REGEX.test(textBlob) || VERSION_REGEX.test(codeBlob);
     const hasReproKeywords = headingTexts.some((t) => REPRO_HEADING_REGEX.test(t));
     const hasExpectedActual = headingTexts.some((t) => EXPECTED_REGEX.test(t)) &&
         headingTexts.some((t) => ACTUAL_REGEX.test(t));

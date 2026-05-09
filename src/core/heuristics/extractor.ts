@@ -42,8 +42,7 @@ export function extractSignals(issue: Issue): Signals {
 
   const hasCodeBlock = codeNodes.length > 0
   const hasStackTrace =
-    codeNodes.some((n) => STACK_TRACE_REGEX.test(n.value)) ||
-    STACK_TRACE_REGEX.test(textBlob)
+    codeNodes.some((n) => STACK_TRACE_REGEX.test(n.value)) || STACK_TRACE_REGEX.test(textBlob)
   const hasMinimalExample = codeNodes.some(
     (n) => n.lang !== null && n.lang !== undefined && n.lang.length > 0,
   )
