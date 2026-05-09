@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+last_updated: "2026-05-09T08:26:16.409Z"
+progress:
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 5
+  completed_plans: 4
+  percent: 80
+---
+
 # State: Signal-OSS
 
 **Project Memory** — Updated at every phase, plan, and milestone transition.
@@ -20,7 +34,7 @@
 **Phase:** Phase 1 — Skeleton + Heuristic Spine + First Comment
 **Plan:** 01-03 complete; next: 01-04-score-checklist
 **Status:** In Progress — Plan 01-03 (heuristics + classifier) complete
-**Progress:** 0/5 phases complete (Phase 1 in progress: 3/5 plans done)
+**Progress:** [████████░░] 80%
 
 ```
 [======    ] 60%  Phase 1 Plan 3/5 complete
@@ -40,6 +54,7 @@
 ## Accumulated Context
 
 ### Key Decisions (carried from PROJECT.md + Plan 02)
+
 - GitHub Action only — no CLI, App, or dashboard for v1
 - Checklist is the hero output; score is a secondary badge
 - Repo-aware checklist with 4-tier graceful-degradation fallback
@@ -54,6 +69,7 @@
 - rollup.config.ts overrides outDir to 'dist' to satisfy @rollup/plugin-typescript path validation
 
 ### Architecture Spine (from research/ARCHITECTURE.md)
+
 - Hexagonal / ports-and-adapters
 - Pure `src/core/score(issue, repoContext, llm?)` entrypoint called by both Action runtime and benchmark harness
 - All I/O (Octokit, LLM, filesystem) injected as ports
@@ -61,17 +77,21 @@
 - LLM is the LAST component wired so heuristics-only is shippable from Phase 1
 
 ### Active Todos
+
 - Execute Phase 1 Plan 04 (01-04-score-checklist): Wire extractSignals + classifyType into score() and implement Tier-4 checklist generator.
 
 ### Completed Plans
+
 - **01-01-scaffold** (2026-05-09): Bootstrapped toolchain — Node 24, TypeScript 5.9, Rollup 4, Vitest 4.1.5, Biome 2.4.14; all Phase 1 deps installed; 2/2 smoke tests passing.
 - **01-02-dtos-stub** (2026-05-09): Locked all Phase 1 DTOs in src/core/types.ts (verbatim from SKELETON.md A6), LLMPort in src/core/llm/port.ts, stub score() with locked sync signature, first Rollup bundle dist/index.js (971KB, Walking Skeleton Stage A). 11/11 tests passing. Hexagonal invariant verified.
 - **01-03-heuristics-classifier** (2026-05-09): Implemented extractSignals() via mdast AST walk (remark-parse + unist-util-visit) for all 7 signals; classifyType() with 4-tier label/title/body/default precedence. 5 fixture files. 59/59 tests passing. Hexagonal invariant verified.
 
 ### Blockers
+
 None.
 
 ### Risk Register (top items, from research/PITFALLS.md)
+
 - Critical: prompt injection from issue body — addressed Phase 4
 - Critical: BYOK key leakage — addressed Phase 4
 - Critical: live-demo LLM outage — addressed Phase 4 + Phase 5

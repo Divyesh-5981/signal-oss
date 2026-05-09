@@ -32,11 +32,11 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
   3. Workflow YAML scopes `on: issues: types: [opened, reopened]` only, declares an explicit `permissions:` block (`issues: write`, `contents: read`), uses only `GITHUB_TOKEN`, and exits early when `github.actor === 'github-actions[bot]'` — no second comment ever appears in a 24h sandbox soak.
   4. Cold-start budget is met: `dist/index.js` is a single bundled file (Rollup ESM) committed to the repo, `action.yml` declares `using: 'node24'`, and event-to-comment p50 is under 10 seconds on a warm runner.
   5. Every static string in the comment passes the read-aloud tone test: no "Required:" / "Must:" / "Invalid"; uses "Could you share…" framings; checklist always non-empty; meta-nudge stub renders correctly when no templates are detected.
-**Plans:** 5 plans
+**Plans:** 4/5 plans executed
   - [x] 01-01-scaffold-PLAN.md — Bootstrap actions/typescript-action template; swap Jest→Vitest and ESLint+Prettier→Biome; lock NodeNext tsconfig and Phase 1 deps
-  - [ ] 01-02-dtos-stub-PLAN.md — Define all Phase 1 DTOs (Issue, Signals, IssueType, RepoContext, ChecklistItem, ScoredIssue, LLMPort); stub score() entrypoint; first Rollup build of dist/index.js (Walking Skeleton Stage A)
-  - [ ] 01-03-heuristics-classifier-PLAN.md — Implement extractSignals (mdast AST walk, all 7 signals) and classifyType (label→title→body→default precedence) as pure functions
-  - [ ] 01-04-checklist-score-format-PLAN.md — Implement strategy-chain checklist generator with Tier-4 baseline, weighted-sum score with gray-zone band 4-6, markdown formatter per D-07; replace stub score() with real pipeline
+  - [x] 01-02-dtos-stub-PLAN.md — Define all Phase 1 DTOs (Issue, Signals, IssueType, RepoContext, ChecklistItem, ScoredIssue, LLMPort); stub score() entrypoint; first Rollup build of dist/index.js (Walking Skeleton Stage A)
+  - [x] 01-03-heuristics-classifier-PLAN.md — Implement extractSignals (mdast AST walk, all 7 signals) and classifyType (label→title→body→default precedence) as pure functions
+  - [x] 01-04-checklist-score-format-PLAN.md — Implement strategy-chain checklist generator with Tier-4 baseline, weighted-sum score with gray-zone band 4-6, markdown formatter per D-07; replace stub score() with real pipeline
   - [ ] 01-05-action-wiring-PLAN.md — Implement GitHub I/O adapter with idempotency marker, full main.ts orchestrator with bot-loop guard, action.yml + workflow YAMLs + fixture event; rebuild dist/; sandbox E2E human-verify checkpoint
 **Pitfall coverage:** Pitfall 1 (`pull_request_target` sidestepped by `on: issues:` only — Critical), Pitfall 2 (bot-loop — `GITHUB_TOKEN`-only + actor guard + `[opened, reopened]` only — Critical), Pitfall 7 (explicit minimal `permissions:` block — High), Pitfall 10 (JS+Rollup cold-start — High), Pitfall 14 (heuristics tested across ≥3 unrelated repos — Medium), Pitfall 17 (no `issue_comment` listener — Medium), Pitfall 20 (structured log levels — Low).
 
@@ -102,7 +102,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Skeleton + Heuristic Spine + First Comment | 1/5 | In Progress | - |
+| 1. Skeleton + Heuristic Spine + First Comment | 4/5 | In Progress|  |
 | 2. Action Hardening + Repo-Awareness | 0/0 | Not started | - |
 | 3. Benchmark + Heuristic Tuning | 0/0 | Not started | - |
 | 4. LLM Adjudicator + Tier 3 | 0/0 | Not started | - |

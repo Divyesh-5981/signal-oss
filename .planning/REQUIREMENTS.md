@@ -9,17 +9,17 @@ Requirements for hackathon submission (Slop Scan 2026). Each maps to a roadmap p
 
 ### Core — Pure Scoring Spine (`src/core/`)
 
-- [ ] **CORE-01**: A pure `score(issue, repoContext, llm?)` entrypoint that returns `{ score, missing, signals, issueType, isGrayZone }` with zero side effects (no Octokit, no fs, no LLM SDK imports inside `src/core/`)
+- [x] **CORE-01**: A pure `score(issue, repoContext, llm?)` entrypoint that returns `{ score, missing, signals, issueType, isGrayZone }` with zero side effects (no Octokit, no fs, no LLM SDK imports inside `src/core/`)
 - [ ] **CORE-02**: Heuristics extractor that walks an mdast/remark AST of the issue body and emits a `Signals` DTO covering: code blocks, stack-trace pattern, version/env mention, repro keywords, expected-vs-actual structure, minimal-example presence, screenshot/image-only flag
 - [ ] **CORE-03**: Issue-type classifier (bug / feature / question) using existing labels (precedence) → title patterns (`[BUG]`, `feat:`, etc.) → body keyword weighting; pure, no LLM
-- [ ] **CORE-04**: Weighted-sum heuristic score 0–10 with documented per-signal weights in a single `weights.ts` constants file; flags `isGrayZone` for the configured band (default 4–6)
-- [ ] **CORE-05**: Output formatter renders a markdown comment containing the checklist (front-and-center) and a small score badge (rendered late); applies meta-nudge when no repo templates are present
-- [ ] **CORE-06**: Comment copy passes a tone style guide — no "Required:" / "Must:" / "Invalid"; uses "Could you share…" framings; read-aloud test on every static string before commit
+- [x] **CORE-04**: Weighted-sum heuristic score 0–10 with documented per-signal weights in a single `weights.ts` constants file; flags `isGrayZone` for the configured band (default 4–6)
+- [x] **CORE-05**: Output formatter renders a markdown comment containing the checklist (front-and-center) and a small score badge (rendered late); applies meta-nudge when no repo templates are present
+- [x] **CORE-06**: Comment copy passes a tone style guide — no "Required:" / "Must:" / "Invalid"; uses "Could you share…" framings; read-aloud test on every static string before commit
 
 ### Checklist — 4-Tier Generator (`src/core/checklist/`)
 
-- [ ] **CHECK-01**: Strategy-chain interface — each tier implements `{ applies(repoContext): boolean, generate(issueType, signals): ChecklistItem[] }`; chain runs first-applies-wins
-- [ ] **CHECK-02**: Tier 4 (Universal Baseline) — bug/feature/question-specific default checklists; always returns a non-empty list; ships first so hero output works on any repo
+- [x] **CHECK-01**: Strategy-chain interface — each tier implements `{ applies(repoContext): boolean, generate(issueType, signals): ChecklistItem[] }`; chain runs first-applies-wins
+- [x] **CHECK-02**: Tier 4 (Universal Baseline) — bug/feature/question-specific default checklists; always returns a non-empty list; ships first so hero output works on any repo
 - [ ] **CHECK-03**: Tier 1 (Issue Forms YAML) — tolerant parser of `.github/ISSUE_TEMPLATE/*.yml` extracts `required: true` fields and matches against signals; gracefully falls through on parse error or unknown schema variation
 - [ ] **CHECK-04**: Tier 2 (Markdown Templates) — parses `.github/ISSUE_TEMPLATE/*.md` headers as field labels (`### Steps to Reproduce`, `### Version`); matches against signals
 - [ ] **CHECK-05**: Tier 3 (CONTRIBUTING.md → LLM extraction) — when only `CONTRIBUTING.md` is present, LLM extracts issue-reporting expectations into a checklist; cached per-repo by content hash; explicit kill-switch (`applies()` returns false) so chain falls through to Tier 4 if disabled
@@ -126,14 +126,14 @@ Every v1 requirement maps to exactly one phase. Coverage validated.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Complete |
 | CORE-02 | Phase 1 | Pending |
 | CORE-03 | Phase 1 | Pending |
-| CORE-04 | Phase 1 | Pending |
-| CORE-05 | Phase 1 | Pending |
-| CORE-06 | Phase 1 | Pending |
-| CHECK-01 | Phase 1 | Pending |
-| CHECK-02 | Phase 1 | Pending |
+| CORE-04 | Phase 1 | Complete |
+| CORE-05 | Phase 1 | Complete |
+| CORE-06 | Phase 1 | Complete |
+| CHECK-01 | Phase 1 | Complete |
+| CHECK-02 | Phase 1 | Complete |
 | CHECK-03 | Phase 2 | Pending |
 | CHECK-04 | Phase 2 | Pending |
 | CHECK-05 | Phase 4 | Pending |
