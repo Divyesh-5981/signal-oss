@@ -41,3 +41,11 @@ export interface ScoredIssue {
   items: ChecklistItem[]
   tierUsed: string
 }
+
+// Strategy chain interface (CHECK-01). Phase 1: only BaselineStrategy implements this.
+// Phase 2 adds IssueFormStrategy, TemplateMdStrategy. Phase 4 adds ContributingStrategy.
+export interface ChecklistStrategy {
+  name: string
+  applies(ctx: RepoContext): boolean
+  generate(type: IssueType, signals: Signals): ChecklistItem[]
+}
