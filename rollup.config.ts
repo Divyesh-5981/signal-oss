@@ -11,7 +11,7 @@ export default {
     sourcemap: true,
   },
   plugins: [
-    typescript({ tsconfig: './tsconfig.json' }),
+    typescript({ tsconfig: './tsconfig.json', outDir: 'dist' }),
     nodeResolve({ preferBuiltins: true }),
     commonjs(),
   ],
