@@ -14,7 +14,7 @@
     "lint": "biome check --no-errors-on-unmatched src",
     "format": "biome format --write --no-errors-on-unmatched src",
     "all": "npm run format && npm run lint && npm run test && npm run package",
-    "local-action": "npx @github/local-action run . src/action/main.ts .env"
+    "local-action": "npx @github/local-action run . src/action/main.ts .env.local"
   },
   "keywords": ["github-action", "issue-triage", "actionability", "checklist", "oss-maintainer"],
   "author": "Signal-OSS",

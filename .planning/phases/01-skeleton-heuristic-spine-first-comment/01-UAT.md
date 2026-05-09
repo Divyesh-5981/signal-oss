@@ -13,17 +13,16 @@ updated: 2026-05-09T00:00:00Z
 
 ## Current Test
 
-number: 4
-name: Format Comment — Structure and Tone
+number: 5
+name: Local-Action Dry Run
 expected: |
-  For a low-quality issue (empty body), format() produces a comment that:
-  1. Starts with a friendly intro line (contains "Thanks for opening" or similar — NOT "Required:" or "Must" or "Invalid")
-  2. Has the checklist items as markdown task list items (- [ ] …)
-  3. Has an **Actionability score: N/10** badge line
-  4. Has a > **Tip:** nudge line about issue templates
-  5. Ends with a closing line followed by `<!-- signal-oss:v1 -->`
-  Sections appear in that order. No gatekeeping language.
-awaiting: automated-check
+  Run the Action locally using the fixture event:
+    npx @github/local-action run . fixtures/event.json .env.local
+  Requires a real GITHUB_TOKEN in .env.local (fake tokens fail at postOrUpdateComment).
+  The action logs a score, issue type, tier, and comment ID to stdout (core.info calls).
+  The comment body dispatched contains `<!-- signal-oss:v1 -->`.
+  The process exits 0 (no core.setFailed call triggered).
+awaiting: user response
 
 ## Tests
 
@@ -69,12 +68,12 @@ result: pass
 ### 5. Local-Action Dry Run
 expected: |
   Run the Action locally using the fixture event:
-    npx @github/local-action run dist/index.js
-  (Set required env vars: GITHUB_TOKEN=any-fake-value, INPUT_ANTHROPIC-API-KEY=sk-ant-fake, etc.)
+    npx @github/local-action run . fixtures/event.json .env.local
+  Requires a real GITHUB_TOKEN in .env.local pointing to a sandbox repo.
   The action logs a score, issue type, tier, and comment ID to stdout (core.info calls).
-  The comment body printed/dispatched contains `<!-- signal-oss:v1 -->`.
+  The comment body dispatched contains `<!-- signal-oss:v1 -->`.
   The process exits 0 (no core.setFailed call triggered).
-result: [pending]
+result: [pending — needs real GITHUB_TOKEN + sandbox repo]
 
 ### 6. Sandbox E2E — Live GitHub Comment
 expected: |
