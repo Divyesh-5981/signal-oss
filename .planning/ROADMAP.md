@@ -33,7 +33,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
   4. Cold-start budget is met: `dist/index.js` is a single bundled file (Rollup ESM) committed to the repo, `action.yml` declares `using: 'node24'`, and event-to-comment p50 is under 10 seconds on a warm runner.
   5. Every static string in the comment passes the read-aloud tone test: no "Required:" / "Must:" / "Invalid"; uses "Could you share…" framings; checklist always non-empty; meta-nudge stub renders correctly when no templates are detected.
 **Plans:** 5 plans
-  - [ ] 01-01-scaffold-PLAN.md — Bootstrap actions/typescript-action template; swap Jest→Vitest and ESLint+Prettier→Biome; lock NodeNext tsconfig and Phase 1 deps
+  - [x] 01-01-scaffold-PLAN.md — Bootstrap actions/typescript-action template; swap Jest→Vitest and ESLint+Prettier→Biome; lock NodeNext tsconfig and Phase 1 deps
   - [ ] 01-02-dtos-stub-PLAN.md — Define all Phase 1 DTOs (Issue, Signals, IssueType, RepoContext, ChecklistItem, ScoredIssue, LLMPort); stub score() entrypoint; first Rollup build of dist/index.js (Walking Skeleton Stage A)
   - [ ] 01-03-heuristics-classifier-PLAN.md — Implement extractSignals (mdast AST walk, all 7 signals) and classifyType (label→title→body→default precedence) as pure functions
   - [ ] 01-04-checklist-score-format-PLAN.md — Implement strategy-chain checklist generator with Tier-4 baseline, weighted-sum score with gray-zone band 4-6, markdown formatter per D-07; replace stub score() with real pipeline
@@ -102,7 +102,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Skeleton + Heuristic Spine + First Comment | 0/5 | Planned | - |
+| 1. Skeleton + Heuristic Spine + First Comment | 1/5 | In Progress | - |
 | 2. Action Hardening + Repo-Awareness | 0/0 | Not started | - |
 | 3. Benchmark + Heuristic Tuning | 0/0 | Not started | - |
 | 4. LLM Adjudicator + Tier 3 | 0/0 | Not started | - |

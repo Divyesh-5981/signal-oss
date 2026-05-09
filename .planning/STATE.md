@@ -18,12 +18,12 @@
 ## Current Position
 
 **Phase:** Phase 1 — Skeleton + Heuristic Spine + First Comment
-**Plan:** Not yet planned (`/gsd-plan-phase 1` to begin)
-**Status:** Roadmap approved; awaiting plan-phase invocation
-**Progress:** 0/5 phases complete
+**Plan:** 01-01 complete; next: 01-02-dtos-stub
+**Status:** In Progress — Plan 01-01 (scaffold) complete
+**Progress:** 0/5 phases complete (Phase 1 in progress: 1/5 plans done)
 
 ```
-[          ] 0%   Phase 1 of 5
+[==        ] 20%  Phase 1 Plan 1/5 complete
 ```
 
 ## Performance Metrics
@@ -59,7 +59,10 @@
 - LLM is the LAST component wired so heuristics-only is shippable from Phase 1
 
 ### Active Todos
-- Begin Phase 1 plan: scaffold from `actions/typescript-action`, swap Jest→Vitest and ESLint+Prettier→Biome, lock DTOs, ship workflow YAML with hardened triggers + permissions, build heuristics extractor, ship Tier-4 baseline checklist, end-to-end first comment on sandbox repo.
+- Execute Phase 1 Plan 02 (01-02-dtos-stub): Define all Phase 1 DTOs, stub score() entrypoint, first Rollup build of dist/index.js (Walking Skeleton Stage A).
+
+### Completed Plans
+- **01-01-scaffold** (2026-05-09): Bootstrapped toolchain — Node 24, TypeScript 5.9, Rollup 4, Vitest 4.1.5, Biome 2.4.14; all Phase 1 deps installed; 2/2 smoke tests passing.
 
 ### Blockers
 None.
@@ -76,9 +79,9 @@ None.
 
 ## Session Continuity
 
-**Last action:** Roadmap created from PROJECT.md + REQUIREMENTS.md + research/SUMMARY.md.
-**Next action:** `/gsd-plan-phase 1` — decompose Phase 1 into executable plans.
-**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue" — every plan inside Phase 1 must contribute to that demoable end-to-end slice.
+**Last action:** Plan 01-01-scaffold executed (2026-05-09). Toolchain bootstrapped: Vitest 4.1.5, Biome 2.4.14, Rollup 4, TypeScript NodeNext. 2/2 smoke tests passing.
+**Next action:** Execute Plan 01-02-dtos-stub — define DTOs, stub score(), first Rollup dist build.
+**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue". Plan 01-01 done; 4 plans remain in Phase 1.
 
 ---
 
