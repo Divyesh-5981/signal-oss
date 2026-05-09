@@ -18,12 +18,12 @@
 ## Current Position
 
 **Phase:** Phase 1 — Skeleton + Heuristic Spine + First Comment
-**Plan:** 01-02 complete; next: 01-03-heuristics
-**Status:** In Progress — Plan 01-02 (DTOs + stub) complete
-**Progress:** 0/5 phases complete (Phase 1 in progress: 2/5 plans done)
+**Plan:** 01-03 complete; next: 01-04-score-checklist
+**Status:** In Progress — Plan 01-03 (heuristics + classifier) complete
+**Progress:** 0/5 phases complete (Phase 1 in progress: 3/5 plans done)
 
 ```
-[====      ] 40%  Phase 1 Plan 2/5 complete
+[======    ] 60%  Phase 1 Plan 3/5 complete
 ```
 
 ## Performance Metrics
@@ -61,11 +61,12 @@
 - LLM is the LAST component wired so heuristics-only is shippable from Phase 1
 
 ### Active Todos
-- Execute Phase 1 Plan 03 (01-03-heuristics): Implement extractSignals() heuristic extractor using unified/remark AST parsing.
+- Execute Phase 1 Plan 04 (01-04-score-checklist): Wire extractSignals + classifyType into score() and implement Tier-4 checklist generator.
 
 ### Completed Plans
 - **01-01-scaffold** (2026-05-09): Bootstrapped toolchain — Node 24, TypeScript 5.9, Rollup 4, Vitest 4.1.5, Biome 2.4.14; all Phase 1 deps installed; 2/2 smoke tests passing.
 - **01-02-dtos-stub** (2026-05-09): Locked all Phase 1 DTOs in src/core/types.ts (verbatim from SKELETON.md A6), LLMPort in src/core/llm/port.ts, stub score() with locked sync signature, first Rollup bundle dist/index.js (971KB, Walking Skeleton Stage A). 11/11 tests passing. Hexagonal invariant verified.
+- **01-03-heuristics-classifier** (2026-05-09): Implemented extractSignals() via mdast AST walk (remark-parse + unist-util-visit) for all 7 signals; classifyType() with 4-tier label/title/body/default precedence. 5 fixture files. 59/59 tests passing. Hexagonal invariant verified.
 
 ### Blockers
 None.
@@ -82,11 +83,11 @@ None.
 
 ## Session Continuity
 
-**Last action:** Plan 01-02-dtos-stub executed (2026-05-09). DTOs locked, score() stubbed, first dist build at 971KB. 11/11 tests passing.
-**Next action:** Execute Plan 01-03-heuristics — implement extractSignals() with unified/remark AST parsing.
-**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue". Plans 01-01 and 01-02 done; 3 plans remain in Phase 1.
+**Last action:** Plan 01-03-heuristics-classifier executed (2026-05-09). extractSignals (7 signals via mdast AST) and classifyType (4-tier precedence) implemented. 5 fixtures. 59/59 tests passing.
+**Next action:** Execute Plan 01-04-score-checklist — wire extractSignals + classifyType into score(), implement Tier-4 checklist generator with weighted scoring.
+**Resume hint:** Phase 1 hero milestone is "Action posts a real Tier-4 baseline checklist comment on a sandbox repo issue". Plans 01-01, 01-02, 01-03 done; 2 plans remain in Phase 1.
 
 ---
 
 *State initialized: 2026-05-08*
-*Last updated: 2026-05-09 after Plan 01-02-dtos-stub*
+*Last updated: 2026-05-09 after Plan 01-03-heuristics-classifier*
