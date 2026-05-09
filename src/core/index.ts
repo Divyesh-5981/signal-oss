@@ -1,8 +1,13 @@
-// The pure score() entrypoint. PHASE 1: returns hardcoded values (Walking Skeleton stub).
-// Plan 04 replaces the stub body with the real heuristic pipeline.
+// src/core/index.ts
+// CORE-01: pure score() entrypoint. Real pipeline (no longer Plan 02 stub).
+// PHASE 1: llm parameter is accepted but always passed null. Phase 4 wires it.
 // CRITICAL: This file MUST NOT import from @octokit, @actions, fs, https, or any LLM SDK.
 
-import type { Issue, RepoContext, ScoredIssue, Signals } from './types.js'
+import { extractSignals } from './heuristics/extractor.js'
+import { classifyType } from './classifier/issue-type.js'
+import { generateChecklist } from './checklist/generator.js'
+import { computeScore } from './score/compute.js'
+import type { Issue, RepoContext, ScoredIssue } from './types.js'
 import type { LLMPort } from './llm/port.js'
 
 export function score(
@@ -10,30 +15,21 @@ export function score(
   repoContext: RepoContext,
   llm: LLMPort | null = null,
 ): ScoredIssue {
-  // Phase 1 stub — Plan 04 replaces this body with extractSignals + classifyType + generateChecklist + computeScore.
-  // The hardcoded values exist solely to prove the wiring works end-to-end (Walking Skeleton Stage A).
-  // The fact that `repoContext` and `llm` parameters are accepted-but-unused is intentional: the signature is locked.
-  void issue
-  void repoContext
+  // Phase 1: llm is always null. Phase 4 will wire gray-zone adjudication here.
   void llm
 
-  const signals: Signals = {
-    hasCodeBlock: false,
-    hasStackTrace: false,
-    hasVersionMention: false,
-    hasReproKeywords: false,
-    hasExpectedActual: false,
-    hasMinimalExample: false,
-    hasImageOnly: false,
-  }
+  const signals = extractSignals(issue)
+  const issueType = classifyType(issue, signals)
+  const { items, tierUsed } = generateChecklist(signals, issueType, repoContext)
+  const { score: scoreValue, isGrayZone } = computeScore(signals)
 
   return {
-    score: 5,
-    missing: ['version'],
+    score: scoreValue,
+    missing: items.map((i) => i.text),
     signals,
-    issueType: 'bug',
-    isGrayZone: true,
-    items: [{ text: 'Could you share your version?', signalKey: 'hasVersionMention' }],
-    tierUsed: 'baseline-stub',
+    issueType,
+    isGrayZone,
+    items,
+    tierUsed,
   }
 }
