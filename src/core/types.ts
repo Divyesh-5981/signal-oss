@@ -24,7 +24,15 @@ export interface RepoContext {
   hasIssueForms: boolean
   hasMdTemplates: boolean
   hasContributing: boolean
-  templates: unknown[]
+  templates: ParsedTemplate[]
+}
+
+// Phase 2 (CHECK-03 / CHECK-04): typed output of the templates adapter.
+// Produced by src/adapters/github/templates.ts; consumed by Tier 1 / Tier 2 strategies in src/core/.
+export interface ParsedTemplate {
+  filename: string
+  type: 'form' | 'md'
+  fields: string[]
 }
 
 export interface ChecklistItem {
@@ -47,5 +55,5 @@ export interface ScoredIssue {
 export interface ChecklistStrategy {
   name: string
   applies(ctx: RepoContext): boolean
-  generate(type: IssueType, signals: Signals): ChecklistItem[]
+  generate(type: IssueType, signals: Signals, ctx?: RepoContext): ChecklistItem[]
 }
