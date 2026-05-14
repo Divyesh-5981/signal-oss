@@ -1,0 +1,15 @@
+name: VS Code Bug
+description: Report a bug
+body:
+  - type: input
+    id: version
+    attributes:
+      label: VS Code Version
+    validations:
+      required: 'true'
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+    validations:
+      required: true

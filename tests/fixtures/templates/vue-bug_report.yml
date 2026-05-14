@@ -1,0 +1,30 @@
+name: Bug Report
+description: File a bug report
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a bug.
+  - type: input
+    id: version
+    attributes:
+      label: Vue version
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to minimal reproduction
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: optional
+    attributes:
+      label: Any additional comments?
+    validations:
+      required: false
