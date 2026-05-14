@@ -1,13 +1,19 @@
 // src/action/main.ts
 // ACT-04: bot-loop guard. ACT-02: only listens to issues events (workflow scopes triggers).
+// ACT-07: reads all 8 inputs. ACT-08: signal-oss-ignore skip-label. ACT-09: rich core.summary.
+// ACT-06: label management runs after hero comment; never blocks it.
 // The orchestrator is intentionally thin — all logic lives in src/core/ and src/adapters/.
 
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { postOrUpdateComment } from '../adapters/github/io.js'
+import type { LabelAction } from '../adapters/github/labels.js'
+import { applyLabel, ensureLabel, removeLabel } from '../adapters/github/labels.js'
+import { loadRepoContext } from '../adapters/github/templates.js'
 import { format } from '../core/format/markdown.js'
 import { score } from '../core/index.js'
-import type { Issue, RepoContext } from '../core/types.js'
+import type { Issue } from '../core/types.js'
+import { writeSkipSummary, writeSummary } from './summary.js'
 
 export async function run(): Promise<void> {
   // ACT-04: belt-and-suspenders bot-loop guard (workflow YAML has its own if: condition).
@@ -34,17 +40,23 @@ export async function run(): Promise<void> {
       : [],
   }
 
-  // Phase 1 stub repo context — Phase 2 implements real template loading.
-  const repoContext: RepoContext = {
-    hasIssueForms: false,
-    hasMdTemplates: false,
-    hasContributing: false,
-    templates: [],
+  // ACT-07: Read all 8 inputs
+  const dryRun = core.getBooleanInput('dry-run')
+  const enableComments = core.getBooleanInput('enable-comments')
+  const enableLabels = core.getBooleanInput('enable-labels')
+  const labelName = core.getInput('label-name') || 'needs-info'
+  const _model = core.getInput('model') // consumed by Phase 4
+  const _grayZoneLow = parseInt(core.getInput('gray-zone-low') || '4', 10) // consumed by Phase 3
+  const _grayZoneHigh = parseInt(core.getInput('gray-zone-high') || '6', 10) // consumed by Phase 3
+  const maxBodyBytes = parseInt(core.getInput('max-body-bytes') || '10000', 10)
+
+  // ACT-08: Skip-label check — earliest exit before any I/O (D-11)
+  if (issue.labels.includes('signal-oss-ignore')) {
+    await writeSkipSummary('signal-oss-ignore label present')
+    return
   }
 
-  const scored = score(issue, repoContext, null)
-  const body = format(scored, repoContext)
-
+  // Octokit + repo setup
   const token = core.getInput('github-token') || process.env.GITHUB_TOKEN
   if (!token) {
     throw new Error('Missing GITHUB_TOKEN — set GITHUB_TOKEN env or github-token input.')
@@ -52,12 +64,56 @@ export async function run(): Promise<void> {
   const octokit = github.getOctokit(token)
   const { owner, repo } = github.context.repo
   const issueNumber = payload.issue.number as number
+  const defaultBranch =
+    (payload.repository as { default_branch?: string } | undefined)?.default_branch ?? 'main'
 
-  const result = await postOrUpdateComment(octokit, owner, repo, issueNumber, body)
+  // Phase 2: real template loading (replaces Phase 1 stub)
+  const repoContext = await loadRepoContext(octokit, owner, repo, defaultBranch)
+
+  // T-02-21: Truncate oversized issue body before scoring (mitigates DoS via large pastes)
+  if (issue.body.length > maxBodyBytes) {
+    issue.body = issue.body.slice(0, maxBodyBytes)
+  }
+
+  const scored = score(issue, repoContext, null)
+  const body = format(scored, repoContext)
+
+  // Hero comment — always first; label/summary failures cannot block it
+  let commentResult: { commentId: number; action: 'created' | 'updated' } | null = null
+  if (!dryRun && enableComments) {
+    commentResult = await postOrUpdateComment(octokit, owner, repo, issueNumber, body)
+  }
+
+  // ACT-06: Label management after hero comment
+  let labelAction: LabelAction = 'disabled'
+  if (dryRun) {
+    labelAction = 'dry-run'
+  } else if (enableLabels) {
+    await ensureLabel(
+      octokit,
+      owner,
+      repo,
+      labelName,
+      '#e4e669',
+      'Waiting for more information from the issue author',
+    )
+    if (scored.items.length > 0) {
+      labelAction = await applyLabel(octokit, owner, repo, issueNumber, labelName)
+    } else {
+      labelAction = await removeLabel(octokit, owner, repo, issueNumber, labelName)
+    }
+  }
+
+  const commentUrl =
+    commentResult !== null
+      ? `https://github.com/${owner}/${repo}/issues/${issueNumber}#issuecomment-${commentResult.commentId}`
+      : null
+
+  // ACT-09: Rich summary report
+  await writeSummary({ issue, issueNumber, scored, labelAction, commentUrl, repoContext, dryRun })
 
   core.info(
-    `Signal-OSS comment ${result.action} on issue #${issueNumber} ` +
-      `(commentId=${result.commentId}, score=${scored.score}, type=${scored.issueType}, ` +
-      `tier=${scored.tierUsed}, items=${scored.items.length}).`,
+    `Signal-OSS: issue #${issueNumber} scored=${scored.score}, type=${scored.issueType}, ` +
+      `tier=${scored.tierUsed}, items=${scored.items.length}, label=${labelAction}.`,
   )
 }

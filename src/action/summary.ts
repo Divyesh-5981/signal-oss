@@ -52,21 +52,21 @@ export async function writeSummary(data: SummaryData): Promise<void> {
     ]
     core.summary.addTable(rows)
 
-    core.summary.addRaw('\n**Label:** ' + data.labelAction + '\n', true)
+    core.summary.addRaw(`\n**Label:** ${data.labelAction}\n`, true)
     if (data.commentUrl) {
-      core.summary.addRaw('**Comment:** ' + data.commentUrl + '\n', true)
+      core.summary.addRaw(`**Comment:** ${data.commentUrl}\n`, true)
     }
     await core.summary.write()
   } catch (err: unknown) {
-    core.warning('Could not write workflow summary: ' + (err as Error).message)
+    core.warning(`Could not write workflow summary: ${(err as Error).message}`)
   }
 }
 
 export async function writeSkipSummary(reason: string): Promise<void> {
   try {
-    core.summary.addRaw('Signal-OSS: Skipped — reason: ' + reason + '\n', true)
+    core.summary.addRaw(`Signal-OSS: Skipped — reason: ${reason}\n`, true)
     await core.summary.write()
   } catch (err: unknown) {
-    core.warning('Could not write skip summary: ' + (err as Error).message)
+    core.warning(`Could not write skip summary: ${(err as Error).message}`)
   }
 }
