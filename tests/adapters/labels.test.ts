@@ -26,8 +26,7 @@ function makeOctokit(overrides: {
   const remove = overrides.removeLabel ?? vi.fn().mockResolvedValue({ data: {} })
   const octokit = {
     rest: {
-      repos: { getLabel, createLabel },
-      issues: { addLabels, removeLabel: remove },
+      issues: { getLabel, createLabel, addLabels, removeLabel: remove },
     },
   } as unknown as Parameters<typeof ensureLabel>[0]
   return { octokit, getLabel, createLabel, addLabels, removeLabel: remove }
