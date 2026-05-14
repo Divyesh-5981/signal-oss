@@ -56,7 +56,23 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 3. On a corpus of 10 real popular repos (e.g., vue/core, microsoft/vscode, rust-lang/rust), the tolerant Tier 1 / Tier 2 parsers either successfully extract `required: true` fields / `### Header` field labels OR fall through to Tier 4 without crashing — zero parser exceptions in the soak run.
 4. The meta-nudge appended to the comment when no `.github/ISSUE_TEMPLATE/` is present reads as a soft tip ("you might consider adding…"), never demanding; this is verified by read-aloud review.
 5. Action inputs (`dry-run`, `enable-comments`, `enable-labels`, `label-name`, `model`, `gray-zone-low`, `gray-zone-high`, `max-body-bytes`) work with sensible zero-config defaults; `core.summary()` writes a workflow-run UI report containing input issue, signals detected, score, and posted comment URL.
-   **Plans:** TBD
+   **Plans:** 5 plans
+
+**Wave 1**
+- [ ] 02-01-foundations-PLAN.md — Install yaml dep; add ParsedTemplate type + widen RepoContext; extend ChecklistStrategy.generate signature; declare all ACT-07 inputs in action.yml
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-02-templates-adapter-PLAN.md — Implement loadRepoContext (CHECK-03 + CHECK-04 parsers) in src/adapters/github/templates.ts with 10+ tests over 5 fixture files
+- [ ] 02-03-labels-adapter-PLAN.md — Implement ensureLabel / applyLabel / removeLabel (ACT-06) in src/adapters/github/labels.ts with 10 tests covering D-13 + Pitfall 7
+- [ ] 02-04-strategies-and-format-PLAN.md — Implement IssueFormStrategy + TemplateMdStrategy; prepend to generator chain; gate META_NUDGE in format() (CHECK-06); sanitize @ in field labels
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 02-05-action-wiring-PLAN.md — Wire main.ts (ACT-07 inputs, ACT-08 skip-label, real loadRepoContext, label mgmt, rich core.summary report per ACT-09); rebuild dist/; sandbox E2E checkpoint
+
+**Cross-cutting constraints:**
+- `src/core/` must stay pure — no Octokit imports in any strategy or type file (hexagonal invariant)
+- Hero output invariant — `postOrUpdateComment` is called before `ensureLabel`/`applyLabel`; label failure never blocks the checklist comment
+- `<!-- signal-oss:v1 -->` idempotency marker must not be changed or version-bumped (Pitfall 19)
    **Pitfall coverage:** Pitfall 8 (tolerant issue-form YAML parser tested against 10 popular repos — High), Pitfall 12 (re-fetch issue body via API + idempotency-marker edit-in-place heals first-comment race — High), Pitfall 15 (markdown render visual review — Medium), Pitfall 19 (versioned marker `signal-oss:v1` — Low).
 
 ### Phase 3: Benchmark + Heuristic Tuning
@@ -114,7 +130,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 | Phase                                         | Plans Complete | Status      | Completed  |
 | --------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Skeleton + Heuristic Spine + First Comment | 5/5            | Done        | 2026-05-14 |
-| 2. Action Hardening + Repo-Awareness          | 0/0            | Not started | -          |
+| 2. Action Hardening + Repo-Awareness          | 0/5            | Planned     | -          |
 | 3. Benchmark + Heuristic Tuning               | 0/0            | Not started | -          |
 | 4. LLM Adjudicator + Tier 3                   | 0/0            | Not started | -          |
 | 5. Demo & Submission                          | 0/0            | Not started | -          |

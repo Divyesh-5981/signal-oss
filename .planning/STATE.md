@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-14T15:00:00.000Z"
+last_updated: "2026-05-14T16:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 5
+  total_plans: 10
   completed_plans: 5
-  percent: 100
+  percent: 50
 ---
 
 # State: Signal-OSS
@@ -25,16 +25,16 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 2 context gathered. Ready for planning: `/gsd-plan-phase 2`
+**Current Focus:** Phase 2 planned — 5 plans ready. Execute: `/gsd-execute-phase 2`
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
 ## Current Position
 
-**Phase:** Phase 1 — Complete ✓ | Next: Phase 2 — Action Hardening + Repo-Awareness
-**Plan:** All 5 Phase 1 plans executed and verified
-**Status:** Phase 1 Done — sandbox E2E verified (comment posts correctly on real issue)
-**Progress:** [██████████] 100% (Phase 1)
+**Phase:** Phase 2 — Action Hardening + Repo-Awareness (Ready to execute)
+**Plan:** 5 plans in 3 waves — research + pattern mapping + verification all passed
+**Status:** Phase 2 Ready — execute with `/gsd-execute-phase 2`
+**Progress:** [██████████] 100% (Phase 1 done) | [          ] 0% (Phase 2 executing)
 
 ```
 [==        ] 20%  Overall (1/5 phases complete)
@@ -80,7 +80,7 @@ progress:
 
 ### Active Todos
 
-- Begin Phase 2 planning: idempotent edit-in-place, label management, Tier 1 (issue forms YAML) + Tier 2 (markdown templates) parsers, action inputs with zero-config defaults.
+- Execute Phase 2: `/gsd-execute-phase 2` — 5 plans in 3 waves (Wave 1: foundations; Wave 2: templates + labels + strategies in parallel; Wave 3: action wiring + sandbox E2E).
 
 ### Completed Plans
 
@@ -107,11 +107,11 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 1 complete (2026-05-14). All 5 plans executed. 96/96 tests passing. Sandbox E2E verified — Action posts Tier-4 baseline checklist comment on real issue within cold-start budget.
-**Next action:** Begin Phase 2 — Action Hardening + Repo-Awareness. First step: create Phase 2 plans (idempotent edit-in-place already partially implemented via marker; focus on label management, Tier 1/2 parsers, action inputs).
-**Resume hint:** Phase 1 is DONE. Phase 2 requirements: ACT-06, ACT-07, ACT-08, ACT-09, ACT-10, CHECK-03, CHECK-04, CHECK-06. Key deliverables: needs-info label auto-create/apply/remove, signal-oss-ignore skip-label, tolerant issue-form YAML parser, markdown template parser, action inputs with defaults, core.summary() report.
+**Last action:** Phase 2 planning complete (2026-05-14). 5 plans created, pattern-mapped, and verified by plan-checker. Research + patterns + all 5 PLAN.md files committed.
+**Next action:** Execute Phase 2 — `/gsd-execute-phase 2`
+**Resume hint:** Phase 2 is fully planned. Wave 1 (02-01 foundations) must land before Wave 2. Wave 2 runs 02-02/03/04 in parallel (no file overlap). Wave 3 (02-05) sequential — full main.ts rewrite + sandbox E2E checkpoint (autonomous: false).
 
 ---
 
 _State initialized: 2026-05-08_
-_Last updated: 2026-05-14 — Phase 1 complete (5/5 plans, sandbox E2E verified)_
+_Last updated: 2026-05-14 — Phase 2 planned (5 plans, research + pattern map + verification passed)_
