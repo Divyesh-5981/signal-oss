@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
   }
 
   const scored = score(issue, repoContext, null)
-  const body = format(scored)
+  const body = format(scored, repoContext)
 
   const token = core.getInput('github-token') || process.env.GITHUB_TOKEN
   if (!token) {

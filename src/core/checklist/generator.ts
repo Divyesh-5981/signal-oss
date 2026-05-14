@@ -3,11 +3,14 @@
 
 import type { ChecklistItem, ChecklistStrategy, IssueType, RepoContext, Signals } from '../types.js'
 import { BaselineStrategy } from './strategies/baseline.js'
+import { IssueFormStrategy } from './strategies/issue-form.js'
+import { TemplateMdStrategy } from './strategies/template-md.js'
 
 const STRATEGIES: ChecklistStrategy[] = [
-  // Phase 2 prepends: IssueFormStrategy, TemplateMdStrategy
-  // Phase 4 prepends:  ContributingStrategy
-  new BaselineStrategy(),
+  new IssueFormStrategy(), // Tier 1
+  new TemplateMdStrategy(), // Tier 2
+  // Phase 4 will prepend: ContributingStrategy (Tier 3)
+  new BaselineStrategy(), // Tier 4 — always applies; must stay last
 ]
 
 export function generateChecklist(
@@ -17,7 +20,7 @@ export function generateChecklist(
 ): { items: ChecklistItem[]; tierUsed: string } {
   for (const s of STRATEGIES) {
     if (s.applies(ctx)) {
-      return { items: s.generate(type, signals), tierUsed: s.name }
+      return { items: s.generate(type, signals, ctx), tierUsed: s.name }
     }
   }
   // Unreachable: BaselineStrategy.applies() always returns true.
