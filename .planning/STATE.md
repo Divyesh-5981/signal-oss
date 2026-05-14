@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-14T16:00:00.000Z"
+last_updated: "2026-05-14T17:45:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 10
-  completed_plans: 5
-  percent: 50
+  completed_plans: 6
+  percent: 60
 ---
 
 # State: Signal-OSS
@@ -25,20 +25,20 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 2 executing — Plan 01 (foundations) complete. Execute Wave 2 plans: 02-02, 02-03, 02-04 (parallel).
+**Current Focus:** Phase 2 Wave 3 complete (02-05 action wiring). Tasks 1-3 done; Task 4 is sandbox E2E human-verify checkpoint — awaiting user verification.
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
 ## Current Position
 
 **Phase:** Phase 2 — Action Hardening + Repo-Awareness (Executing)
-**Plan:** Wave 1 complete (02-01 foundations); Wave 2 ready to execute
-**Status:** Phase 2 In Progress — Plan 01 done; execute Wave 2 next
-**Progress:** [██████████] 100% (Phase 1 done) | [██        ] 20% (Phase 2 executing, 1/5 plans)
+**Plan:** 02-05 tasks 1-3 complete; checkpoint Task 4 awaiting human-verify
+**Status:** Phase 2 In Progress — 5/5 plans code-complete; sandbox E2E verification pending
+**Progress:** [██████████] 100% (Phase 1 done) | [██████████] 100% (Phase 2 code done, E2E pending)
 
 ```
-[==        ] 20%  Overall (1/5 phases complete)
-[==        ] 20%  Phase 2 (1/5 plans complete)
+[======    ] 60%  Overall (6/10 plans complete)
+[██████████] 100% Phase 2 code (5/5 plans implemented; E2E pending)
 ```
 
 ## Performance Metrics
@@ -82,7 +82,7 @@ progress:
 ### Active Todos
 
 - Execute Phase 2 Wave 2: 02-02 (templates adapter), 02-03 (labels adapter), 02-04 (strategies) — all three can run in parallel.
-- Then execute Phase 2 Wave 3: 02-05 (action wiring + sandbox E2E checkpoint).
+- Wave 3 (02-05) complete. Awaiting sandbox E2E checkpoint verification (Task 4).
 
 ### Completed Plans
 
@@ -92,6 +92,8 @@ progress:
 - **01-04-checklist-score-format** (2026-05-09): Implemented strategy-chain checklist generator (BaselineStrategy, Tier-4), weighted-sum computeScore() with gray-zone band 4-6, markdown formatter with idempotency marker. Real score() pipeline wired. Tests passing. Hexagonal invariant verified.
 - **01-05-action-wiring** (2026-05-14): Implemented GitHub I/O adapter (postOrUpdateComment with idempotency marker), full main.ts orchestrator with bot-loop guard, action.yml (node24), triage.yml + ci.yml workflows, fixture event JSON, dist/index.js rebuilt (1.5MB). 96/96 tests passing. Sandbox E2E verified — comment posts correctly on real issue.
 - **02-01-foundations** (2026-05-14): Installed yaml@2.9.0 runtime dep; added ParsedTemplate interface; widened RepoContext.templates to ParsedTemplate[]; extended ChecklistStrategy.generate with ctx?: RepoContext; declared all 9 ACT-07 inputs in action.yml. 96/96 tests still passing. Wave 2 unblocked.
+- **02-05-action-wiring** (2026-05-14): summary.ts (writeSummary D-09 + writeSkipSummary D-11), main.ts Phase 2 orchestrator (all 8 inputs, skip-label, real loadRepoContext, body truncation T-02-21, label management, dry-run gating), dist rebuilt 1748KB. 154/154 tests passing. Task 4 sandbox E2E checkpoint pending.
+- **Key decisions added:** vi.hoisted() pattern for Vitest mock hoisting; body truncation (T-02-21) slice(0, maxBodyBytes); commentUrl built from commentResult.commentId.
 
 ### Blockers
 
@@ -110,9 +112,9 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 2 Plan 01 (foundations) complete (2026-05-14). yaml installed, ParsedTemplate added, action.yml inputs declared. 96/96 tests green.
-**Next action:** Execute Phase 2 Wave 2 — 02-02 (templates adapter), 02-03 (labels adapter), 02-04 (strategies) in parallel.
-**Resume hint:** Wave 1 complete. Wave 2 can run 02-02/03/04 in parallel (no file overlap). Wave 3 (02-05) is sequential — full main.ts rewrite + sandbox E2E checkpoint (autonomous: false).
+**Last action:** Phase 2 Plan 05 (action wiring) Tasks 1-3 complete (2026-05-14). 154/154 tests green. dist rebuilt. Sandbox E2E checkpoint (Task 4) returned for human verification.
+**Next action:** User performs sandbox E2E Tests 1-5. On approval, mark Phase 2 complete and proceed to Phase 3.
+**Resume hint:** 02-05 Task 4 is human-verify checkpoint. After user types "approved", mark Phase 2 done and start Phase 3 (benchmark + heuristic tuning).
 
 ---
 
