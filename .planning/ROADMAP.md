@@ -62,9 +62,9 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 - [x] 02-01-foundations-PLAN.md — Install yaml dep; add ParsedTemplate type + widen RepoContext; extend ChecklistStrategy.generate signature; declare all ACT-07 inputs in action.yml
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02-templates-adapter-PLAN.md — Implement loadRepoContext (CHECK-03 + CHECK-04 parsers) in src/adapters/github/templates.ts with 10+ tests over 5 fixture files
-- [ ] 02-03-labels-adapter-PLAN.md — Implement ensureLabel / applyLabel / removeLabel (ACT-06) in src/adapters/github/labels.ts with 10 tests covering D-13 + Pitfall 7
-- [ ] 02-04-strategies-and-format-PLAN.md — Implement IssueFormStrategy + TemplateMdStrategy; prepend to generator chain; gate META_NUDGE in format() (CHECK-06); sanitize @ in field labels
+- [x] 02-02-templates-adapter-PLAN.md — Implement loadRepoContext (CHECK-03 + CHECK-04 parsers) in src/adapters/github/templates.ts with 10+ tests over 5 fixture files
+- [x] 02-03-labels-adapter-PLAN.md — Implement ensureLabel / applyLabel / removeLabel (ACT-06) in src/adapters/github/labels.ts with 10 tests covering D-13 + Pitfall 7
+- [x] 02-04-strategies-and-format-PLAN.md — Implement IssueFormStrategy + TemplateMdStrategy; prepend to generator chain; gate META_NUDGE in format() (CHECK-06); sanitize @ in field labels
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-05-action-wiring-PLAN.md — Wire main.ts (ACT-07 inputs, ACT-08 skip-label, real loadRepoContext, label mgmt, rich core.summary report per ACT-09); rebuild dist/; sandbox E2E checkpoint
