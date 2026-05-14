@@ -1,22 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Capture the markdown buffered via core.summary.addRaw / addTable
-const buffer: string[] = []
-const mockSummary = {
-  addRaw: vi.fn((s: string, _addEOL?: boolean) => {
-    buffer.push(s)
-    return mockSummary
-  }),
-  addTable: vi.fn((rows: unknown[]) => {
-    // Flatten table cells for assertion convenience
-    buffer.push(JSON.stringify(rows))
-    return mockSummary
-  }),
-  addEOL: vi.fn(() => mockSummary),
-  write: vi.fn().mockResolvedValue(undefined),
-}
-
-const mockWarning = vi.fn()
+// Use vi.hoisted so the mock factory can reference these before imports are resolved
+const { mockSummary, mockWarning } = vi.hoisted(() => {
+  const buffer: string[] = []
+  const ms = {
+    addRaw: vi.fn((s: string) => { buffer.push(s); return ms }),
+    addTable: vi.fn((rows: unknown[]) => { buffer.push(JSON.stringify(rows)); return ms }),
+    addEOL: vi.fn(() => ms),
+    write: vi.fn().mockResolvedValue(undefined),
+    _buffer: buffer,
+  }
+  return { mockSummary: ms, mockWarning: vi.fn() }
+})
 
 vi.mock('@actions/core', () => ({
   warning: mockWarning,
@@ -26,7 +21,6 @@ vi.mock('@actions/core', () => ({
 
 import type { SummaryData } from '../../src/action/summary.js'
 import { writeSummary, writeSkipSummary } from '../../src/action/summary.js'
-import * as core from '@actions/core'
 
 function makeData(overrides: Partial<SummaryData> = {}): SummaryData {
   return {
@@ -58,22 +52,26 @@ function makeData(overrides: Partial<SummaryData> = {}): SummaryData {
 }
 
 beforeEach(() => {
-  buffer.length = 0
+  mockSummary._buffer.length = 0
   vi.clearAllMocks()
   mockSummary.write.mockResolvedValue(undefined)
+  // Re-wire addRaw/addTable after clearAllMocks (restore side effects)
+  mockSummary.addRaw.mockImplementation((s: string) => { mockSummary._buffer.push(s); return mockSummary })
+  mockSummary.addTable.mockImplementation((rows: unknown[]) => { mockSummary._buffer.push(JSON.stringify(rows)); return mockSummary })
+  mockSummary.addEOL.mockImplementation(() => mockSummary)
 })
 
 describe('writeSummary', () => {
   it('S1: renders header line with issue # and title', async () => {
     await writeSummary(makeData())
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('#42')
     expect(out).toContain('Sample bug')
   })
 
   it('S2: renders signals table with all 7 signals', async () => {
     await writeSummary(makeData())
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('Code block')
     expect(out).toContain('Stack trace')
     expect(out).toContain('Version mention')
@@ -81,13 +79,12 @@ describe('writeSummary', () => {
     expect(out).toContain('Expected/actual')
     expect(out).toContain('Minimal example')
     expect(out).toContain('Image only')
-    // Each signal has either ✓ or ✗
     expect(out).toMatch(/[✓✗]/)
   })
 
   it('S3: renders tier used, score, and type', async () => {
     await writeSummary(makeData())
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('baseline')
     expect(out).toContain('6/10')
     expect(out).toContain('bug')
@@ -95,23 +92,23 @@ describe('writeSummary', () => {
 
   it('S4: dry-run banner appears when dryRun=true', async () => {
     await writeSummary(makeData({ dryRun: true }))
-    const out = buffer.join('')
-    expect(out).toContain('⚠️ Dry-run mode')
+    const out = mockSummary._buffer.join('')
+    expect(out).toContain('Dry-run mode')
   })
 
   it('S5: comment URL rendered when commentUrl is non-null', async () => {
     await writeSummary(makeData({ commentUrl: 'https://github.com/o/r/issues/42#issuecomment-123' }))
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('https://github.com/o/r/issues/42#issuecomment-123')
   })
 
   it('S6: label action line present', async () => {
     await writeSummary(makeData({ labelAction: 'applied' }))
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('applied')
   })
 
-  it('S7: $GITHUB_STEP_SUMMARY missing → core.warning called, no throw', async () => {
+  it('S7: GITHUB_STEP_SUMMARY missing → core.warning called, no throw', async () => {
     mockSummary.write.mockRejectedValueOnce(new Error('GITHUB_STEP_SUMMARY not set'))
     await expect(writeSummary(makeData())).resolves.toBeUndefined()
     expect(mockWarning).toHaveBeenCalledWith(
@@ -121,7 +118,7 @@ describe('writeSummary', () => {
 
   it('S4b: no dry-run banner when dryRun=false', async () => {
     await writeSummary(makeData({ dryRun: false }))
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).not.toContain('⚠️ Dry-run mode')
   })
 })
@@ -129,7 +126,7 @@ describe('writeSummary', () => {
 describe('writeSkipSummary', () => {
   it('S8: single line with reason, no signals table', async () => {
     await writeSkipSummary('signal-oss-ignore label present')
-    const out = buffer.join('')
+    const out = mockSummary._buffer.join('')
     expect(out).toContain('signal-oss-ignore label present')
     expect(out).not.toContain('Code block')
     expect(out).not.toContain('Stack trace')
