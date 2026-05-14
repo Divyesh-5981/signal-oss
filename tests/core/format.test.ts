@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { format, MARKER } from '../../src/core/format/markdown.js'
-import type { ScoredIssue, Signals } from '../../src/core/types.js'
+import type { RepoContext, ScoredIssue, Signals } from '../../src/core/types.js'
 
 const ZERO_SIGNALS: Signals = {
   hasCodeBlock: false, hasStackTrace: false, hasVersionMention: false,
@@ -106,5 +106,49 @@ describe('format() — idempotency marker (ACT-05)', () => {
 
   it('marker uses the v1 literal — version-locked for Phase 2 hardening', () => {
     expect(MARKER).toBe('<!-- signal-oss:v1 -->')
+  })
+})
+
+// ============================================================
+// format() — meta-nudge gating (CHECK-06) — Plan 04 tests
+// ============================================================
+
+describe('format() — meta-nudge gating (CHECK-06)', () => {
+  it('F1: format(scored) without repoContext still shows META_NUDGE (backwards-compatible)', () => {
+    const md = format(makeScored({ items: [], score: 5 }))
+    expect(md).toContain('**Tip:**')
+  })
+
+  it('F2: format(scored, ctx) with hasIssueForms=true → no META_NUDGE', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: true,
+      hasMdTemplates: false,
+      hasContributing: false,
+      templates: [],
+    }
+    const md = format(makeScored({ items: [], score: 5 }), ctx)
+    expect(md).not.toContain('**Tip:**')
+  })
+
+  it('F3: format(scored, ctx) with hasMdTemplates=true → no META_NUDGE', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: false,
+      hasMdTemplates: true,
+      hasContributing: false,
+      templates: [],
+    }
+    const md = format(makeScored({ items: [], score: 5 }), ctx)
+    expect(md).not.toContain('**Tip:**')
+  })
+
+  it('F4: format(scored, ctx) with both flags false → META_NUDGE present', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: false,
+      hasMdTemplates: false,
+      hasContributing: false,
+      templates: [],
+    }
+    const md = format(makeScored({ items: [], score: 5 }), ctx)
+    expect(md).toContain('**Tip:**')
   })
 })
