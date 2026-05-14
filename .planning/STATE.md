@@ -25,19 +25,20 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 2 planned — 5 plans ready. Execute: `/gsd-execute-phase 2`
+**Current Focus:** Phase 2 executing — Plan 01 (foundations) complete. Execute Wave 2 plans: 02-02, 02-03, 02-04 (parallel).
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
 ## Current Position
 
-**Phase:** Phase 2 — Action Hardening + Repo-Awareness (Ready to execute)
-**Plan:** 5 plans in 3 waves — research + pattern mapping + verification all passed
-**Status:** Phase 2 Ready — execute with `/gsd-execute-phase 2`
-**Progress:** [██████████] 100% (Phase 1 done) | [          ] 0% (Phase 2 executing)
+**Phase:** Phase 2 — Action Hardening + Repo-Awareness (Executing)
+**Plan:** Wave 1 complete (02-01 foundations); Wave 2 ready to execute
+**Status:** Phase 2 In Progress — Plan 01 done; execute Wave 2 next
+**Progress:** [██████████] 100% (Phase 1 done) | [██        ] 20% (Phase 2 executing, 1/5 plans)
 
 ```
 [==        ] 20%  Overall (1/5 phases complete)
+[==        ] 20%  Phase 2 (1/5 plans complete)
 ```
 
 ## Performance Metrics
@@ -80,7 +81,8 @@ progress:
 
 ### Active Todos
 
-- Execute Phase 2: `/gsd-execute-phase 2` — 5 plans in 3 waves (Wave 1: foundations; Wave 2: templates + labels + strategies in parallel; Wave 3: action wiring + sandbox E2E).
+- Execute Phase 2 Wave 2: 02-02 (templates adapter), 02-03 (labels adapter), 02-04 (strategies) — all three can run in parallel.
+- Then execute Phase 2 Wave 3: 02-05 (action wiring + sandbox E2E checkpoint).
 
 ### Completed Plans
 
@@ -89,6 +91,7 @@ progress:
 - **01-03-heuristics-classifier** (2026-05-09): Implemented extractSignals() via mdast AST walk (remark-parse + unist-util-visit) for all 7 signals; classifyType() with 4-tier label/title/body/default precedence. 5 fixture files. 59/59 tests passing. Hexagonal invariant verified.
 - **01-04-checklist-score-format** (2026-05-09): Implemented strategy-chain checklist generator (BaselineStrategy, Tier-4), weighted-sum computeScore() with gray-zone band 4-6, markdown formatter with idempotency marker. Real score() pipeline wired. Tests passing. Hexagonal invariant verified.
 - **01-05-action-wiring** (2026-05-14): Implemented GitHub I/O adapter (postOrUpdateComment with idempotency marker), full main.ts orchestrator with bot-loop guard, action.yml (node24), triage.yml + ci.yml workflows, fixture event JSON, dist/index.js rebuilt (1.5MB). 96/96 tests passing. Sandbox E2E verified — comment posts correctly on real issue.
+- **02-01-foundations** (2026-05-14): Installed yaml@2.9.0 runtime dep; added ParsedTemplate interface; widened RepoContext.templates to ParsedTemplate[]; extended ChecklistStrategy.generate with ctx?: RepoContext; declared all 9 ACT-07 inputs in action.yml. 96/96 tests still passing. Wave 2 unblocked.
 
 ### Blockers
 
@@ -107,9 +110,9 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 2 planning complete (2026-05-14). 5 plans created, pattern-mapped, and verified by plan-checker. Research + patterns + all 5 PLAN.md files committed.
-**Next action:** Execute Phase 2 — `/gsd-execute-phase 2`
-**Resume hint:** Phase 2 is fully planned. Wave 1 (02-01 foundations) must land before Wave 2. Wave 2 runs 02-02/03/04 in parallel (no file overlap). Wave 3 (02-05) sequential — full main.ts rewrite + sandbox E2E checkpoint (autonomous: false).
+**Last action:** Phase 2 Plan 01 (foundations) complete (2026-05-14). yaml installed, ParsedTemplate added, action.yml inputs declared. 96/96 tests green.
+**Next action:** Execute Phase 2 Wave 2 — 02-02 (templates adapter), 02-03 (labels adapter), 02-04 (strategies) in parallel.
+**Resume hint:** Wave 1 complete. Wave 2 can run 02-02/03/04 in parallel (no file overlap). Wave 3 (02-05) is sequential — full main.ts rewrite + sandbox E2E checkpoint (autonomous: false).
 
 ---
 

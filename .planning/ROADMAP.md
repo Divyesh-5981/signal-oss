@@ -59,7 +59,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
    **Plans:** 5 plans
 
 **Wave 1**
-- [ ] 02-01-foundations-PLAN.md — Install yaml dep; add ParsedTemplate type + widen RepoContext; extend ChecklistStrategy.generate signature; declare all ACT-07 inputs in action.yml
+- [x] 02-01-foundations-PLAN.md — Install yaml dep; add ParsedTemplate type + widen RepoContext; extend ChecklistStrategy.generate signature; declare all ACT-07 inputs in action.yml
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02-templates-adapter-PLAN.md — Implement loadRepoContext (CHECK-03 + CHECK-04 parsers) in src/adapters/github/templates.ts with 10+ tests over 5 fixture files
@@ -130,7 +130,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 | Phase                                         | Plans Complete | Status      | Completed  |
 | --------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Skeleton + Heuristic Spine + First Comment | 5/5            | Done        | 2026-05-14 |
-| 2. Action Hardening + Repo-Awareness          | 0/5            | Planned     | -          |
+| 2. Action Hardening + Repo-Awareness          | 1/5            | Executing   | -          |
 | 3. Benchmark + Heuristic Tuning               | 0/0            | Not started | -          |
 | 4. LLM Adjudicator + Tier 3                   | 0/0            | Not started | -          |
 | 5. Demo & Submission                          | 0/0            | Not started | -          |
@@ -164,4 +164,4 @@ All 5 Critical pitfalls have explicit success criteria in the phase that prevent
 ---
 
 _Roadmap created: 2026-05-08_
-_Last updated: 2026-05-14 — Phase 1 complete (5/5 plans executed, sandbox E2E verified)_
+_Last updated: 2026-05-14 — Phase 2 executing: Wave 1 complete (02-01 foundations); Wave 2 ready_

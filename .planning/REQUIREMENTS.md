@@ -33,7 +33,7 @@ Requirements for hackathon submission (Slop Scan 2026). Each maps to a roadmap p
 - [ ] **ACT-04**: Bot-loop guard — early return when `github.actor === 'github-actions[bot]'` or comment author is the Action's bot identity
 - [ ] **ACT-05**: Comment idempotency via HTML marker (`<!-- signal-oss:v1 -->`); find-existing → update-in-place via `octokit.rest.issues.updateComment`; never creates a duplicate
 - [ ] **ACT-06**: Label management — auto-create configured `needs-info` label (color + description) if missing; apply when checklist has any items; remove when checklist becomes empty on re-run
-- [ ] **ACT-07**: Action inputs — `dry-run`, `enable-comments`, `enable-labels`, `label-name`, `model` (string), `gray-zone-low`, `gray-zone-high`, `max-body-bytes`; sensible zero-config defaults
+- [x] **ACT-07**: Action inputs — `dry-run`, `enable-comments`, `enable-labels`, `label-name`, `model` (string), `gray-zone-low`, `gray-zone-high`, `max-body-bytes`; sensible zero-config defaults
 - [ ] **ACT-08**: Skip-label opt-out — if issue carries `signal-oss-ignore` label at trigger time, exit cleanly with a one-line summary
 - [ ] **ACT-09**: `core.summary()` writes a workflow-run UI report (input issue, signals detected, score, posted comment URL) — doubles as live demo material
 - [ ] **ACT-10**: Cold-start budget — JS+ncc bundle achieves <10s p50 from event to comment posted on a warm runner
@@ -144,7 +144,7 @@ Every v1 requirement maps to exactly one phase. Coverage validated.
 | ACT-04 | Phase 1 | Pending |
 | ACT-05 | Phase 1 | Pending |
 | ACT-06 | Phase 2 | Pending |
-| ACT-07 | Phase 2 | Pending |
+| ACT-07 | Phase 2 | Complete |
 | ACT-08 | Phase 2 | Pending |
 | ACT-09 | Phase 2 | Pending |
 | ACT-10 | Phase 2 | Pending |
