@@ -29,6 +29,12 @@ const SIGNAL_LABELS: Array<[SignalKey, string]> = [
   ['hasImageOnly', 'Image only'],
 ]
 
+// CR-03: Escape untrusted issue title before embedding in workflow summary markdown.
+// Strips newlines (prevents heading injection), removes leading # sequences, limits to 200 chars.
+function escapeMdTitle(raw: string): string {
+  return raw.replace(/[\r\n]/g, ' ').replace(/^#+\s*/gm, '').slice(0, 200)
+}
+
 export async function writeSummary(data: SummaryData): Promise<void> {
   try {
     if (data.dryRun) {
@@ -37,7 +43,7 @@ export async function writeSummary(data: SummaryData): Promise<void> {
         true,
       )
     }
-    core.summary.addRaw(`## Signal-OSS: #${data.issueNumber} ${data.issue.title}\n\n`, true)
+    core.summary.addRaw(`## Signal-OSS: #${data.issueNumber} ${escapeMdTitle(data.issue.title)}\n\n`, true)
     core.summary.addRaw(
       `**Type:** ${data.scored.issueType} | **Score:** ${data.scored.score}/10 | **Tier:** ${data.scored.tierUsed} | **Templates:** ${data.repoContext.templates.length}\n\n`,
       true,

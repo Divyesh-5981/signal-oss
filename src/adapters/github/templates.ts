@@ -47,12 +47,13 @@ export async function loadRepoContext(
     return EMPTY_CONTEXT
   }
 
-  // 2. Filter to parseable templates; skip config.yml (Pitfall 2 / T-02-07)
+  // 2. Filter to parseable templates; skip config.yml / config.yaml (Pitfall 2 / T-02-07, CR-02)
+  const SKIP_NAMES = new Set(['config.yml', 'config.yaml'])
   const templateFiles = listing.filter(
     (f) =>
       f.type === 'file' &&
       (f.name.endsWith('.yml') || f.name.endsWith('.yaml') || f.name.endsWith('.md')) &&
-      f.name.toLowerCase() !== 'config.yml',
+      !SKIP_NAMES.has(f.name.toLowerCase()),
   )
 
   // 3. Per-file fetch + parse
