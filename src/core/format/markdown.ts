@@ -3,7 +3,7 @@
 // CORE-06: tone style guide enforced by no 'Required:' / 'Must:' / 'Invalid' static strings here.
 // ACT-05: emits the <!-- signal-oss:v1 --> idempotency marker.
 
-import type { ScoredIssue } from '../types.js'
+import type { RepoContext, ScoredIssue } from '../types.js'
 
 export const MARKER = '<!-- signal-oss:v1 -->'
 
@@ -15,7 +15,7 @@ const META_NUDGE =
 const CLOSING_HAS_ITEMS =
   "Once these are added, we'll take another look. Thanks for helping make this actionable!"
 
-export function format(scored: ScoredIssue): string {
+export function format(scored: ScoredIssue, repoContext?: RepoContext): string {
   const { items, score } = scored
   const hasItems = items.length > 0
 
@@ -24,10 +24,18 @@ export function format(scored: ScoredIssue): string {
   const badge = `**Actionability score: ${score}/10**`
   const closing = hasItems ? CLOSING_HAS_ITEMS : ''
 
+  // CHECK-06: meta-nudge appears ONLY when the repo has no templates of either kind.
+  // When repoContext is undefined (legacy callers), default to showing the nudge.
+  const showMetaNudge = !repoContext?.hasIssueForms && !repoContext?.hasMdTemplates
   // Filter empty sections; preserve D-07 ordering.
-  const sections = [intro, checklist, badge, META_NUDGE, closing, MARKER].filter(
-    (s) => s.length > 0,
-  )
+  const sections = [
+    intro,
+    checklist,
+    badge,
+    showMetaNudge ? META_NUDGE : '',
+    closing,
+    MARKER,
+  ].filter((s) => s.length > 0)
 
   return sections.join('\n\n')
 }

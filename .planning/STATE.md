@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-14T14:30:00.000Z"
+status: completed
+last_updated: "2026-05-15T04:21:29.740Z"
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  completed_phases: 2
+  total_plans: 10
+  completed_plans: 10
   percent: 100
 ---
 
@@ -25,19 +25,20 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 1 complete. Next: Phase 2 — Action Hardening + Repo-Awareness (idempotent edit-in-place, label management, Tier 1/2 template parsers).
+**Current Focus:** Phase 2 complete — all 5 plans executed, sandbox E2E approved, 157 tests passing. Next: `/gsd-discuss-phase 3` or `/gsd-plan-phase 3`.
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
 ## Current Position
 
-**Phase:** Phase 1 — Complete ✓ | Next: Phase 2 — Action Hardening + Repo-Awareness
-**Plan:** All 5 Phase 1 plans executed and verified
-**Status:** Phase 1 Done — sandbox E2E verified (comment posts correctly on real issue)
-**Progress:** [██████████] 100% (Phase 1)
+**Phase:** Phase 3 — Benchmark + Heuristic Tuning (Next)
+**Plan:** 02-05 complete (sandbox E2E approved); Phase 2 fully done
+**Status:** Phase 2 Complete — 5/5 plans done; ready for Phase 3
+**Progress:** [██████████] 100% (Phase 1 done) | [██████████] 100% (Phase 2 done)
 
 ```
-[==        ] 20%  Overall (1/5 phases complete)
+[========  ] 40%  Overall (2/5 phases complete — note: Phase 3 plans TBD)
+[██████████] 100% Phase 2 (5/5 plans complete; E2E verified)
 ```
 
 ## Performance Metrics
@@ -80,7 +81,8 @@ progress:
 
 ### Active Todos
 
-- Begin Phase 2 planning: idempotent edit-in-place, label management, Tier 1 (issue forms YAML) + Tier 2 (markdown templates) parsers, action inputs with zero-config defaults.
+- Execute Phase 2 Wave 2: 02-02 (templates adapter), 02-03 (labels adapter), 02-04 (strategies) — all three can run in parallel.
+- Wave 3 (02-05) complete. Awaiting sandbox E2E checkpoint verification (Task 4).
 
 ### Completed Plans
 
@@ -89,6 +91,9 @@ progress:
 - **01-03-heuristics-classifier** (2026-05-09): Implemented extractSignals() via mdast AST walk (remark-parse + unist-util-visit) for all 7 signals; classifyType() with 4-tier label/title/body/default precedence. 5 fixture files. 59/59 tests passing. Hexagonal invariant verified.
 - **01-04-checklist-score-format** (2026-05-09): Implemented strategy-chain checklist generator (BaselineStrategy, Tier-4), weighted-sum computeScore() with gray-zone band 4-6, markdown formatter with idempotency marker. Real score() pipeline wired. Tests passing. Hexagonal invariant verified.
 - **01-05-action-wiring** (2026-05-14): Implemented GitHub I/O adapter (postOrUpdateComment with idempotency marker), full main.ts orchestrator with bot-loop guard, action.yml (node24), triage.yml + ci.yml workflows, fixture event JSON, dist/index.js rebuilt (1.5MB). 96/96 tests passing. Sandbox E2E verified — comment posts correctly on real issue.
+- **02-01-foundations** (2026-05-14): Installed yaml@2.9.0 runtime dep; added ParsedTemplate interface; widened RepoContext.templates to ParsedTemplate[]; extended ChecklistStrategy.generate with ctx?: RepoContext; declared all 9 ACT-07 inputs in action.yml. 96/96 tests still passing. Wave 2 unblocked.
+- **02-05-action-wiring** (2026-05-14): summary.ts (writeSummary D-09 + writeSkipSummary D-11), main.ts Phase 2 orchestrator (all 8 inputs, skip-label, real loadRepoContext, body truncation T-02-21, label management, dry-run gating), dist rebuilt 1748KB. 154/154 tests passing. Task 4 sandbox E2E checkpoint pending.
+- **Key decisions added:** vi.hoisted() pattern for Vitest mock hoisting; body truncation (T-02-21) slice(0, maxBodyBytes); commentUrl built from commentResult.commentId.
 
 ### Blockers
 
@@ -107,11 +112,11 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 1 complete (2026-05-14). All 5 plans executed. 96/96 tests passing. Sandbox E2E verified — Action posts Tier-4 baseline checklist comment on real issue within cold-start budget.
-**Next action:** Begin Phase 2 — Action Hardening + Repo-Awareness. First step: create Phase 2 plans (idempotent edit-in-place already partially implemented via marker; focus on label management, Tier 1/2 parsers, action inputs).
-**Resume hint:** Phase 1 is DONE. Phase 2 requirements: ACT-06, ACT-07, ACT-08, ACT-09, ACT-10, CHECK-03, CHECK-04, CHECK-06. Key deliverables: needs-info label auto-create/apply/remove, signal-oss-ignore skip-label, tolerant issue-form YAML parser, markdown template parser, action inputs with defaults, core.summary() report.
+**Last action:** Phase 2 Plan 05 sandbox E2E approved (2026-05-15). All 5 scenarios passed. Phase 2 fully complete — 5/5 plans done.
+**Next action:** Begin Phase 3 — Benchmark + Heuristic Tuning (scraper harness, replay harness, heuristic tuning, precision/recall report).
+**Resume hint:** Phase 2 done. Start Phase 3 planning via /gsd-plan-phase or /gsd-execute-phase.
 
 ---
 
 _State initialized: 2026-05-08_
-_Last updated: 2026-05-14 — Phase 1 complete (5/5 plans, sandbox E2E verified)_
+_Last updated: 2026-05-15 — Phase 2 complete (5/5 plans, sandbox E2E approved)_

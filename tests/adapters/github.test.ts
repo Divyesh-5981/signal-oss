@@ -6,22 +6,26 @@ function makeOctokit(comments: Array<{ id: number; body?: string }>) {
   const listComments = vi.fn().mockResolvedValue({ data: comments })
   const createComment = vi.fn().mockResolvedValue({ data: { id: 9999 } })
   const updateComment = vi.fn().mockResolvedValue({ data: {} })
+  // paginate returns the items array directly (mimics octokit.paginate behaviour)
+  const paginate = vi.fn().mockResolvedValue(comments)
   const octokit = {
+    paginate,
     rest: {
       issues: { listComments, createComment, updateComment },
     },
   } as unknown as Parameters<typeof postOrUpdateComment>[0]
-  return { octokit, listComments, createComment, updateComment }
+  return { octokit, paginate, listComments, createComment, updateComment }
 }
 
 describe('postOrUpdateComment — create branch (no existing marker)', () => {
   it('listComments returns empty → createComment is called once with body', async () => {
-    const { octokit, listComments, createComment, updateComment } = makeOctokit([])
+    const { octokit, paginate, createComment, updateComment } = makeOctokit([])
     const result = await postOrUpdateComment(octokit, 'owner', 'repo', 42, `hello ${MARKER}`)
-    expect(listComments).toHaveBeenCalledTimes(1)
-    expect(listComments).toHaveBeenCalledWith({
-      owner: 'owner', repo: 'repo', issue_number: 42, per_page: 100,
-    })
+    expect(paginate).toHaveBeenCalledTimes(1)
+    expect(paginate).toHaveBeenCalledWith(
+      expect.anything(),
+      { owner: 'owner', repo: 'repo', issue_number: 42, per_page: 100 },
+    )
     expect(createComment).toHaveBeenCalledTimes(1)
     expect(createComment).toHaveBeenCalledWith({
       owner: 'owner', repo: 'repo', issue_number: 42, body: `hello ${MARKER}`,
@@ -40,10 +44,13 @@ describe('postOrUpdateComment — create branch (no existing marker)', () => {
     expect(updateComment).not.toHaveBeenCalled()
   })
 
-  it('listComments called with per_page: 100', async () => {
-    const { octokit, listComments } = makeOctokit([])
+  it('paginate called with per_page: 100', async () => {
+    const { octokit, paginate } = makeOctokit([])
     await postOrUpdateComment(octokit, 'owner', 'repo', 1, 'body')
-    expect(listComments).toHaveBeenCalledWith(expect.objectContaining({ per_page: 100 }))
+    expect(paginate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ per_page: 100 }),
+    )
   })
 })
 
@@ -90,16 +97,22 @@ describe('postOrUpdateComment — update branch (marker found)', () => {
 })
 
 describe('postOrUpdateComment — Octokit error propagation', () => {
-  it('listComments rejection bubbles up', async () => {
-    const listComments = vi.fn().mockRejectedValue(new Error('boom'))
-    const octokit = { rest: { issues: { listComments } } } as unknown as Parameters<typeof postOrUpdateComment>[0]
+  it('paginate rejection bubbles up', async () => {
+    const paginate = vi.fn().mockRejectedValue(new Error('boom'))
+    const octokit = {
+      paginate,
+      rest: { issues: { listComments: vi.fn(), createComment: vi.fn(), updateComment: vi.fn() } },
+    } as unknown as Parameters<typeof postOrUpdateComment>[0]
     await expect(postOrUpdateComment(octokit, 'o', 'r', 1, 'b')).rejects.toThrow('boom')
   })
 
   it('createComment rejection bubbles up', async () => {
-    const listComments = vi.fn().mockResolvedValue({ data: [] })
+    const paginate = vi.fn().mockResolvedValue([])
     const createComment = vi.fn().mockRejectedValue(new Error('network error'))
-    const octokit = { rest: { issues: { listComments, createComment } } } as unknown as Parameters<typeof postOrUpdateComment>[0]
+    const octokit = {
+      paginate,
+      rest: { issues: { listComments: vi.fn(), createComment, updateComment: vi.fn() } },
+    } as unknown as Parameters<typeof postOrUpdateComment>[0]
     await expect(postOrUpdateComment(octokit, 'o', 'r', 1, 'b')).rejects.toThrow('network error')
   })
 })

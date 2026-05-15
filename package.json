@@ -16,18 +16,27 @@
     "all": "npm run format && npm run lint && npm run test && npm run package",
     "local-action": "npx @github/local-action run . src/action/main.ts .env"
   },
-  "keywords": ["github-action", "issue-triage", "actionability", "checklist", "oss-maintainer"],
+  "keywords": [
+    "github-action",
+    "issue-triage",
+    "actionability",
+    "checklist",
+    "oss-maintainer"
+  ],
   "author": "Signal-OSS",
   "license": "MIT",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
-    "unified": "^11.0.5",
-    "remark-parse": "^11.0.0",
-    "remark-gfm": "^4.0.1",
-    "unist-util-visit": "^5.1.0",
     "mdast-util-to-string": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0",
+    "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -36,10 +45,10 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.0",
     "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "rollup": "^4.60.3",
     "tslib": "^2.7.0",
     "typescript": "^5.9.0",
-    "vitest": "^4.1.5",
-    "@vitest/coverage-v8": "^4.1.5"
+    "vitest": "^4.1.5"
   }
 }
