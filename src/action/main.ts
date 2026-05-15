@@ -17,8 +17,9 @@ import { writeSkipSummary, writeSummary } from './summary.js'
 
 export async function run(): Promise<void> {
   // ACT-04: belt-and-suspenders bot-loop guard (workflow YAML has its own if: condition).
-  if (github.context.actor === 'github-actions[bot]') {
-    core.info('Skipping — triggered by github-actions[bot] actor (bot-loop guard).')
+  // WR-01: block all [bot] actors (dependabot[bot], renovate[bot], etc.), not just github-actions[bot].
+  if (github.context.actor.endsWith('[bot]')) {
+    core.info(`Skipping — triggered by bot actor: ${github.context.actor}`)
     return
   }
 
@@ -40,15 +41,21 @@ export async function run(): Promise<void> {
       : [],
   }
 
+  // WR-02: safe integer parser — returns fallback when parseInt yields NaN or non-positive value.
+  function parsePositiveInt(raw: string, fallback: number): number {
+    const v = parseInt(raw, 10)
+    return Number.isFinite(v) && v > 0 ? v : fallback
+  }
+
   // ACT-07: Read all 8 inputs
   const dryRun = core.getBooleanInput('dry-run')
   const enableComments = core.getBooleanInput('enable-comments')
   const enableLabels = core.getBooleanInput('enable-labels')
   const labelName = core.getInput('label-name') || 'needs-info'
   const _model = core.getInput('model') // consumed by Phase 4
-  const _grayZoneLow = parseInt(core.getInput('gray-zone-low') || '4', 10) // consumed by Phase 3
-  const _grayZoneHigh = parseInt(core.getInput('gray-zone-high') || '6', 10) // consumed by Phase 3
-  const maxBodyBytes = parseInt(core.getInput('max-body-bytes') || '10000', 10)
+  const _grayZoneLow = parsePositiveInt(core.getInput('gray-zone-low') || '4', 4) // consumed by Phase 3
+  const _grayZoneHigh = parsePositiveInt(core.getInput('gray-zone-high') || '6', 6) // consumed by Phase 3
+  const maxBodyBytes = parsePositiveInt(core.getInput('max-body-bytes') || '10000', 10000)
 
   // ACT-08: Skip-label check — earliest exit before any I/O (D-11)
   if (issue.labels.includes('signal-oss-ignore')) {
