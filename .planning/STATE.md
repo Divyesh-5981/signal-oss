@@ -25,7 +25,7 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 2 complete — all 5 plans executed, sandbox E2E approved, 157 tests passing. Next: `/gsd-discuss-phase 3` or `/gsd-plan-phase 3`.
+**Current Focus:** Phase 3 context gathered. Next: `/gsd-plan-phase 3`.
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
@@ -112,9 +112,9 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 2 Plan 05 sandbox E2E approved (2026-05-15). All 5 scenarios passed. Phase 2 fully complete — 5/5 plans done.
-**Next action:** Begin Phase 3 — Benchmark + Heuristic Tuning (scraper harness, replay harness, heuristic tuning, precision/recall report).
-**Resume hint:** Phase 2 done. Start Phase 3 planning via /gsd-plan-phase or /gsd-execute-phase.
+**Last action:** Phase 3 context gathered (2026-05-15). Decisions: vscode/react/rust repos, labels-first ground truth, manual heuristic tuning, all-issues scrape with classifyType at replay.
+**Next action:** Plan Phase 3 via /gsd-plan-phase 3.
+**Resume hint:** Phase 3 context ready. Run /gsd-plan-phase 3 to create plans.
 
 ---
 
