@@ -7,6 +7,7 @@ import { loadRepoContext } from '../../src/adapters/github/templates.js'
 vi.mock('@actions/core', () => ({
   warning: vi.fn(),
   info: vi.fn(),
+  debug: vi.fn(),
 }))
 
 const FIXTURES = join(__dirname, '..', 'fixtures', 'templates')

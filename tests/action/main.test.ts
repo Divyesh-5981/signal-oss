@@ -171,6 +171,7 @@ describe('main.ts orchestrator', () => {
     await run()
     expect(vi.mocked(postOrUpdateComment)).not.toHaveBeenCalled()
     expect(mockLoadRepoContext).not.toHaveBeenCalled()
+    expect(mockGetOctokit).not.toHaveBeenCalled()
     expect(mockWriteSkipSummary).toHaveBeenCalledWith(expect.stringContaining('signal-oss-ignore'))
   })
 

@@ -113,12 +113,12 @@ describe('applyLabel', () => {
     })
   })
 
-  it('Test 6: addLabels rejects → returns "skipped" + warning called', async () => {
+  it('Test 6: addLabels rejects → returns "error" + warning called', async () => {
     const { octokit } = makeOctokit({
       addLabels: vi.fn().mockRejectedValue(new Error('forbidden')),
     })
     const result = await applyLabel(octokit, 'o', 'r', 42, 'needs-info')
-    expect(result).toBe('skipped')
+    expect(result).toBe('error')
     expect(core.warning).toHaveBeenCalledTimes(1)
   })
 })
@@ -142,12 +142,12 @@ describe('removeLabel', () => {
     expect(core.warning).not.toHaveBeenCalled()
   })
 
-  it('Test 9: removeLabel non-404 error → returns "skipped" + warning called', async () => {
+  it('Test 9: removeLabel non-404 error → returns "error" + warning called', async () => {
     const { octokit } = makeOctokit({
       removeLabel: vi.fn().mockRejectedValue(httpError(500, 'server error')),
     })
     const result = await removeLabel(octokit, 'o', 'r', 42, 'needs-info')
-    expect(result).toBe('skipped')
+    expect(result).toBe('error')
     expect(core.warning).toHaveBeenCalledTimes(1)
   })
 })
@@ -173,10 +173,12 @@ describe('LabelAction type check', () => {
     const _c: LabelAction = 'skipped'
     const _d: LabelAction = 'disabled'
     const _e: LabelAction = 'dry-run'
+    const _f: LabelAction = 'error'
     expect(_a).toBe('applied')
     expect(_b).toBe('removed')
     expect(_c).toBe('skipped')
     expect(_d).toBe('disabled')
     expect(_e).toBe('dry-run')
+    expect(_f).toBe('error')
   })
 })
