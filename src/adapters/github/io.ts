@@ -14,9 +14,10 @@ export async function postOrUpdateComment(
   issueNumber: number,
   body: string,
 ): Promise<{ commentId: number; action: 'created' | 'updated' }> {
-  // Step 1: list existing comments. Phase 1 reads first page only (per_page: 100).
-  // Phase 2 may add pagination if it ever matters.
-  const { data: comments } = await octokit.rest.issues.listComments({
+  // Step 1: paginate all comments to find existing Signal-OSS marker (CR-01).
+  // Single-page fetch misses the marker when an issue has >100 comments, causing
+  // duplicate comments on every re-triage. octokit.paginate walks all pages.
+  const comments = await octokit.paginate(octokit.rest.issues.listComments, {
     owner,
     repo,
     issue_number: issueNumber,
