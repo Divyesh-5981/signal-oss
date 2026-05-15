@@ -91,6 +91,21 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
    **Plans:** 3 plans
 
 **Wave 1**
+- [ ] 03-01-PLAN.md — Install devDeps (@octokit/rest, @octokit/plugin-throttling, p-limit); define BenchmarkFixture/SplitManifest DTOs; implement Wilson CI, Cohen's κ, seededSplit as pure-math module with unit tests
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — Octokit+throttling scraper; ground-truth labeling (invalid/duplicate/wontfix/needs-info); skip-if-exists fixture cache; seeded 70/30 split.json; CLI `scripts/benchmark.ts --mode scrape`
+
+**Wave 3** *(blocked on Wave 1+2 completion)*
+- [ ] 03-03-PLAN.md — Replay harness calling production `score()` (BENCH-04 invariant); per-type confusion matrix; F1-optimal threshold; κ-audit human checkpoint; `bench/REPORT.md` committed
+
+**Cross-cutting constraints:**
+- `src/core/` must stay pure — replay harness imports `score()` from `src/core/index.ts`, never reimplements scoring logic (BENCH-04 invariant)
+- 70% training split only for tuning — held-out 30% never touched until final report run (BENCH-03 invariant; verifiable by git history)
+- `@actions/github` must NOT be used in bench scripts — use standalone `@octokit/rest` instead
+
+
+**Wave 1**
 - [ ] 03-01-PLAN.md — Install devDeps (@octokit/rest, plugin-throttling, p-limit, tsx); DTOs (BenchmarkFixture, SplitManifest); metrics math module (Wilson CI, Cohens kappa, F1-threshold scan, seeded split)
 
 **Wave 2** *(blocked on Wave 1 completion)*

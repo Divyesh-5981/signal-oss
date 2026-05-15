@@ -25,7 +25,7 @@ progress:
 
 **Core Value:** The hero output is a tailored missing-info checklist on every new issue. If the score, the labeling, the dashboards, and every other feature fail, the comment with a useful checklist must still post — because that's what saves the maintainer time.
 
-**Current Focus:** Phase 3 context gathered. Next: `/gsd-plan-phase 3`.
+**Current Focus:** Phase 3 planned — 3 plans in 3 waves. Next: `/gsd-execute-phase 3`.
 
 **Mode:** MVP — every phase ships a demoable end-to-end slice. Phase 1 already comments something useful; later phases enrich.
 
@@ -112,9 +112,9 @@ None.
 
 ## Session Continuity
 
-**Last action:** Phase 3 context gathered (2026-05-15). Decisions: vscode/react/rust repos, labels-first ground truth, manual heuristic tuning, all-issues scrape with classifyType at replay.
-**Next action:** Plan Phase 3 via /gsd-plan-phase 3.
-**Resume hint:** Phase 3 context ready. Run /gsd-plan-phase 3 to create plans.
+**Last action:** Phase 3 planned (2026-05-15). 3 plans created: 03-01 devDeps+metrics, 03-02 scraper+CLI, 03-03 replay+tuning+report. Verification passed (3 minor warnings).
+**Next action:** Execute Phase 3 via /gsd-execute-phase 3. Plans 01 and 02 run autonomously; Plan 03 has a κ-audit human checkpoint (~30 min manual labeling).
+**Resume hint:** Phase 3 ready to execute. Run /gsd-execute-phase 3.
 
 ---
 
