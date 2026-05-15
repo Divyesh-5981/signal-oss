@@ -89,6 +89,8 @@ export async function loadRepoContext(
     }
   }
 
+  // hasContributing: always false in Phase 2; Phase 4 will implement CONTRIBUTING.md fetch
+  core.debug('hasContributing: stubbed false (Phase 4 will implement)')
   return {
     hasIssueForms: templates.some((t) => t.type === 'form'),
     hasMdTemplates: templates.some((t) => t.type === 'md'),
