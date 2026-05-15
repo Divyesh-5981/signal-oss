@@ -28418,6 +28418,13 @@ function setFailed(message) {
     error(message);
 }
 /**
+ * Writes debug message to user log
+ * @param message debug message
+ */
+function debug(message) {
+    issueCommand('debug', {}, message);
+}
+/**
  * Adds an error issue
  * @param message error issue message. Errors will be converted to string via toString()
  * @param properties optional properties to add to the annotation.
@@ -33424,9 +33431,10 @@ function format(scored, repoContext) {
 // ACT-05: comment idempotency. Find-existing-by-marker → update OR create.
 // Adapters layer: Octokit lives here. NEVER imported by src/core/.
 async function postOrUpdateComment(octokit, owner, repo, issueNumber, body) {
-    // Step 1: list existing comments. Phase 1 reads first page only (per_page: 100).
-    // Phase 2 may add pagination if it ever matters.
-    const { data: comments } = await octokit.rest.issues.listComments({
+    // Step 1: paginate all comments to find existing Signal-OSS marker (CR-01).
+    // Single-page fetch misses the marker when an issue has >100 comments, causing
+    // duplicate comments on every re-triage. octokit.paginate walks all pages.
+    const comments = await octokit.paginate(octokit.rest.issues.listComments, {
         owner,
         repo,
         issue_number: issueNumber,
@@ -33498,7 +33506,7 @@ async function applyLabel(octokit, owner, repo, issueNumber, name) {
     }
     catch (err) {
         warning(`Could not apply label "${name}": ${err.message}`);
-        return 'skipped';
+        return 'error';
     }
 }
 async function removeLabel(octokit, owner, repo, issueNumber, name) {
@@ -33514,10 +33522,11 @@ async function removeLabel(octokit, owner, repo, issueNumber, name) {
     catch (err) {
         const status = err.status;
         // Pitfall 7: 404 means label wasn't on the issue — desired state already achieved
-        if (status !== 404) {
-            warning(`Could not remove label "${name}": ${err.message}`);
+        if (status === 404) {
+            return 'skipped';
         }
-        return 'skipped';
+        warning(`Could not remove label "${name}": ${err.message}`);
+        return 'error';
     }
 }
 
@@ -55835,10 +55844,11 @@ async function loadRepoContext(octokit, owner, repo, defaultBranch) {
         warning(`Could not list .github/ISSUE_TEMPLATE: ${err.message}`);
         return EMPTY_CONTEXT;
     }
-    // 2. Filter to parseable templates; skip config.yml (Pitfall 2 / T-02-07)
+    // 2. Filter to parseable templates; skip config.yml / config.yaml (Pitfall 2 / T-02-07, CR-02)
+    const SKIP_NAMES = new Set(['config.yml', 'config.yaml']);
     const templateFiles = listing.filter((f) => f.type === 'file' &&
         (f.name.endsWith('.yml') || f.name.endsWith('.yaml') || f.name.endsWith('.md')) &&
-        f.name.toLowerCase() !== 'config.yml');
+        !SKIP_NAMES.has(f.name.toLowerCase()));
     // 3. Per-file fetch + parse
     const templates = [];
     for (const file of templateFiles) {
@@ -55867,6 +55877,8 @@ async function loadRepoContext(octokit, owner, repo, defaultBranch) {
             warning(`Could not fetch template ${file.name}: ${err.message}`);
         }
     }
+    // hasContributing: always false in Phase 2; Phase 4 will implement CONTRIBUTING.md fetch
+    debug('hasContributing: stubbed false (Phase 4 will implement)');
     return {
         hasIssueForms: templates.some((t) => t.type === 'form'),
         hasMdTemplates: templates.some((t) => t.type === 'md'),
@@ -55972,78 +55984,9 @@ class BaselineStrategy {
     }
 }
 
-// src/core/checklist/strategies/issue-form.ts
-// Tier 1 (CHECK-03): consumes ParsedTemplate[] (type: 'form') from RepoContext.templates.
-// Pure — no Octokit, no fs. Templates are produced by src/adapters/github/templates.ts.
-const TYPE_KEYWORDS$1 = {
-    bug: 'bug_report',
-    feature: 'feature_request',
-    question: 'question',
-};
-const MAX_ITEMS$1 = 5;
-// Maps common template field labels to signal keys for filtering.
-// If a signal is true, the corresponding field is already provided — skip it.
-const FIELD_SIGNAL_MAP$1 = [
-    { pattern: /version|environment|env|platform|os/i, signalKey: 'hasVersionMention' },
-    { pattern: /repro|steps to reproduce|how to reproduce/i, signalKey: 'hasReproKeywords' },
-    { pattern: /stack\s*trace|error\s*(message|output|log)/i, signalKey: 'hasStackTrace' },
-    { pattern: /expected|actual/i, signalKey: 'hasExpectedActual' },
-    { pattern: /code|snippet|example|minimal/i, signalKey: 'hasMinimalExample' },
-];
-function isFieldSatisfied$1(label, signals) {
-    for (const { pattern, signalKey } of FIELD_SIGNAL_MAP$1) {
-        if (pattern.test(label) && signals[signalKey])
-            return true;
-    }
-    return false;
-}
-function sanitizeFieldLabel$1(label) {
-    // T-02-09 follow-up: defang @mentions in user-authored template field labels
-    // so they don't tag arbitrary users when rendered as comment text.
-    return label.replace(/@/g, '(at)').trim();
-}
-function selectFormFields(type, forms) {
-    const keyword = TYPE_KEYWORDS$1[type];
-    const matched = forms.find((t) => t.filename.toLowerCase().includes(keyword));
-    if (matched)
-        return matched.fields;
-    // D-05 fallback: deduplicated union of all form templates' fields, preserving first-seen order
-    const seen = new Set();
-    const union = [];
-    for (const t of forms) {
-        for (const f of t.fields) {
-            if (!seen.has(f)) {
-                seen.add(f);
-                union.push(f);
-            }
-        }
-    }
-    return union;
-}
-class IssueFormStrategy {
-    name = 'issue-form';
-    applies(ctx) {
-        if (!ctx.hasIssueForms)
-            return false;
-        return ctx.templates.some((t) => t.type === 'form' && t.fields.length > 0);
-    }
-    generate(type, signals, ctx) {
-        if (!ctx)
-            return [];
-        const forms = ctx.templates.filter((t) => t.type === 'form');
-        const fields = selectFormFields(type, forms);
-        return fields
-            .filter((label) => !isFieldSatisfied$1(label, signals))
-            .map((label) => ({
-            text: `Could you share the ${sanitizeFieldLabel$1(label).toLowerCase()}?`,
-        }))
-            .slice(0, MAX_ITEMS$1);
-    }
-}
-
-// src/core/checklist/strategies/template-md.ts
-// Tier 2 (CHECK-04): consumes ParsedTemplate[] (type: 'md') from RepoContext.templates.
-// Same selection rules as Tier 1 but only operates on markdown templates.
+// src/core/checklist/strategies/shared.ts
+// WR-04: shared logic extracted from IssueFormStrategy and TemplateMdStrategy.
+// Pure — no Octokit, no fs, no adapters. Hexagonal invariant holds.
 const TYPE_KEYWORDS = {
     bug: 'bug_report',
     feature: 'feature_request',
@@ -56067,16 +56010,19 @@ function isFieldSatisfied(label, signals) {
     return false;
 }
 function sanitizeFieldLabel(label) {
+    // T-02-09 follow-up: defang @mentions in user-authored template field labels
+    // so they don't tag arbitrary users when rendered as comment text.
     return label.replace(/@/g, '(at)').trim();
 }
-function selectMdFields(type, mds) {
+// D-05 fallback: select fields by type keyword match, or deduplicated union of all templates.
+function selectByTypeOrUnion(type, templates) {
     const keyword = TYPE_KEYWORDS[type];
-    const matched = mds.find((t) => t.filename.toLowerCase().includes(keyword));
+    const matched = templates.find((t) => t.filename.toLowerCase().includes(keyword));
     if (matched)
         return matched.fields;
     const seen = new Set();
     const union = [];
-    for (const t of mds) {
+    for (const t of templates) {
         for (const f of t.fields) {
             if (!seen.has(f)) {
                 seen.add(f);
@@ -56086,6 +56032,34 @@ function selectMdFields(type, mds) {
     }
     return union;
 }
+
+// src/core/checklist/strategies/issue-form.ts
+// Tier 1 (CHECK-03): consumes ParsedTemplate[] (type: 'form') from RepoContext.templates.
+// Pure — no Octokit, no fs. Templates are produced by src/adapters/github/templates.ts.
+class IssueFormStrategy {
+    name = 'issue-form';
+    applies(ctx) {
+        if (!ctx.hasIssueForms)
+            return false;
+        return ctx.templates.some((t) => t.type === 'form' && t.fields.length > 0);
+    }
+    generate(type, signals, ctx) {
+        if (!ctx)
+            return [];
+        const forms = ctx.templates.filter((t) => t.type === 'form');
+        const fields = selectByTypeOrUnion(type, forms);
+        return fields
+            .filter((label) => !isFieldSatisfied(label, signals))
+            .map((label) => ({
+            text: `Could you share the ${sanitizeFieldLabel(label).toLowerCase()}?`,
+        }))
+            .slice(0, MAX_ITEMS);
+    }
+}
+
+// src/core/checklist/strategies/template-md.ts
+// Tier 2 (CHECK-04): consumes ParsedTemplate[] (type: 'md') from RepoContext.templates.
+// Same selection rules as Tier 1 but only operates on markdown templates.
 class TemplateMdStrategy {
     name = 'template-md';
     applies(ctx) {
@@ -56097,7 +56071,7 @@ class TemplateMdStrategy {
         if (!ctx)
             return [];
         const mds = ctx.templates.filter((t) => t.type === 'md');
-        const fields = selectMdFields(type, mds);
+        const fields = selectByTypeOrUnion(type, mds);
         return fields
             .filter((label) => !isFieldSatisfied(label, signals))
             .map((label) => ({
@@ -56296,12 +56270,20 @@ const SIGNAL_LABELS = [
     ['hasMinimalExample', 'Minimal example'],
     ['hasImageOnly', 'Image only'],
 ];
+// CR-03: Escape untrusted issue title before embedding in workflow summary markdown.
+// Strips newlines (prevents heading injection), removes leading # sequences, limits to 200 chars.
+function escapeMdTitle(raw) {
+    return raw
+        .replace(/[\r\n]/g, ' ')
+        .replace(/^#+\s*/gm, '')
+        .slice(0, 200);
+}
 async function writeSummary(data) {
     try {
         if (data.dryRun) {
             summary.addRaw('⚠️ **Dry-run mode** — no comment was posted, no labels were changed.\n\n', true);
         }
-        summary.addRaw(`## Signal-OSS: #${data.issueNumber} ${data.issue.title}\n\n`, true);
+        summary.addRaw(`## Signal-OSS: #${data.issueNumber} ${escapeMdTitle(data.issue.title)}\n\n`, true);
         summary.addRaw(`**Type:** ${data.scored.issueType} | **Score:** ${data.scored.score}/10 | **Tier:** ${data.scored.tierUsed} | **Templates:** ${data.repoContext.templates.length}\n\n`, true);
         const rows = [
             [
@@ -56338,8 +56320,9 @@ async function writeSkipSummary(reason) {
 // The orchestrator is intentionally thin — all logic lives in src/core/ and src/adapters/.
 async function run() {
     // ACT-04: belt-and-suspenders bot-loop guard (workflow YAML has its own if: condition).
-    if (context.actor === 'github-actions[bot]') {
-        info('Skipping — triggered by github-actions[bot] actor (bot-loop guard).');
+    // WR-01: block all [bot] actors (dependabot[bot], renovate[bot], etc.), not just github-actions[bot].
+    if (context.actor.endsWith('[bot]')) {
+        info(`Skipping — triggered by bot actor: ${context.actor}`);
         return;
     }
     const payload = context.payload;
@@ -56356,15 +56339,20 @@ async function run() {
                 .filter((s) => s.length > 0)
             : [],
     };
+    // WR-02: safe integer parser — returns fallback when parseInt yields NaN or non-positive value.
+    function parsePositiveInt(raw, fallback) {
+        const v = parseInt(raw, 10);
+        return Number.isFinite(v) && v > 0 ? v : fallback;
+    }
     // ACT-07: Read all 8 inputs
     const dryRun = getBooleanInput('dry-run');
     const enableComments = getBooleanInput('enable-comments');
     const enableLabels = getBooleanInput('enable-labels');
     const labelName = getInput('label-name') || 'needs-info';
     getInput('model'); // consumed by Phase 4
-    parseInt(getInput('gray-zone-low') || '4', 10); // consumed by Phase 3
-    parseInt(getInput('gray-zone-high') || '6', 10); // consumed by Phase 3
-    const maxBodyBytes = parseInt(getInput('max-body-bytes') || '10000', 10);
+    parsePositiveInt(getInput('gray-zone-low') || '4', 4); // consumed by Phase 3
+    parsePositiveInt(getInput('gray-zone-high') || '6', 6); // consumed by Phase 3
+    const maxBodyBytes = parsePositiveInt(getInput('max-body-bytes') || '10000', 10000);
     // ACT-08: Skip-label check — earliest exit before any I/O (D-11)
     if (issue.labels.includes('signal-oss-ignore')) {
         await writeSkipSummary('signal-oss-ignore label present');
