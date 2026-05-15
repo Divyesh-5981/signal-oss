@@ -9,7 +9,7 @@ import type {
   RepoContext,
   Signals,
 } from '../../types.js'
-import { MAX_ITEMS, isFieldSatisfied, sanitizeFieldLabel, selectByTypeOrUnion } from './shared.js'
+import { isFieldSatisfied, MAX_ITEMS, sanitizeFieldLabel, selectByTypeOrUnion } from './shared.js'
 
 export class TemplateMdStrategy implements ChecklistStrategy {
   name = 'template-md'
