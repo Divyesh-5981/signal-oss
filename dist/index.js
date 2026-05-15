@@ -55981,6 +55981,22 @@ const TYPE_KEYWORDS$1 = {
     question: 'question',
 };
 const MAX_ITEMS$1 = 5;
+// Maps common template field labels to signal keys for filtering.
+// If a signal is true, the corresponding field is already provided — skip it.
+const FIELD_SIGNAL_MAP$1 = [
+    { pattern: /version|environment|env|platform|os/i, signalKey: 'hasVersionMention' },
+    { pattern: /repro|steps to reproduce|how to reproduce/i, signalKey: 'hasReproKeywords' },
+    { pattern: /stack\s*trace|error\s*(message|output|log)/i, signalKey: 'hasStackTrace' },
+    { pattern: /expected|actual/i, signalKey: 'hasExpectedActual' },
+    { pattern: /code|snippet|example|minimal/i, signalKey: 'hasMinimalExample' },
+];
+function isFieldSatisfied$1(label, signals) {
+    for (const { pattern, signalKey } of FIELD_SIGNAL_MAP$1) {
+        if (pattern.test(label) && signals[signalKey])
+            return true;
+    }
+    return false;
+}
 function sanitizeFieldLabel$1(label) {
     // T-02-09 follow-up: defang @mentions in user-authored template field labels
     // so they don't tag arbitrary users when rendered as comment text.
@@ -56011,12 +56027,13 @@ class IssueFormStrategy {
             return false;
         return ctx.templates.some((t) => t.type === 'form' && t.fields.length > 0);
     }
-    generate(type, _signals, ctx) {
+    generate(type, signals, ctx) {
         if (!ctx)
             return [];
         const forms = ctx.templates.filter((t) => t.type === 'form');
         const fields = selectFormFields(type, forms);
         return fields
+            .filter((label) => !isFieldSatisfied$1(label, signals))
             .map((label) => ({
             text: `Could you share the ${sanitizeFieldLabel$1(label).toLowerCase()}?`,
         }))
@@ -56033,6 +56050,22 @@ const TYPE_KEYWORDS = {
     question: 'question',
 };
 const MAX_ITEMS = 5;
+// Maps common template field labels to signal keys for filtering.
+// If a signal is true, the corresponding field is already provided — skip it.
+const FIELD_SIGNAL_MAP = [
+    { pattern: /version|environment|env|platform|os/i, signalKey: 'hasVersionMention' },
+    { pattern: /repro|steps to reproduce|how to reproduce/i, signalKey: 'hasReproKeywords' },
+    { pattern: /stack\s*trace|error\s*(message|output|log)/i, signalKey: 'hasStackTrace' },
+    { pattern: /expected|actual/i, signalKey: 'hasExpectedActual' },
+    { pattern: /code|snippet|example|minimal/i, signalKey: 'hasMinimalExample' },
+];
+function isFieldSatisfied(label, signals) {
+    for (const { pattern, signalKey } of FIELD_SIGNAL_MAP) {
+        if (pattern.test(label) && signals[signalKey])
+            return true;
+    }
+    return false;
+}
 function sanitizeFieldLabel(label) {
     return label.replace(/@/g, '(at)').trim();
 }
@@ -56060,12 +56093,13 @@ class TemplateMdStrategy {
             return false;
         return ctx.templates.some((t) => t.type === 'md' && t.fields.length > 0);
     }
-    generate(type, _signals, ctx) {
+    generate(type, signals, ctx) {
         if (!ctx)
             return [];
         const mds = ctx.templates.filter((t) => t.type === 'md');
         const fields = selectMdFields(type, mds);
         return fields
+            .filter((label) => !isFieldSatisfied(label, signals))
             .map((label) => ({
             text: `Could you share the ${sanitizeFieldLabel(label).toLowerCase()}?`,
         }))
