@@ -12,7 +12,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 ## Phases
 
 - [x] **Phase 1: Skeleton + Heuristic Spine + First Comment** - Action posts a real Tier-4 baseline checklist comment on a sandbox issue
-- [ ] **Phase 2: Action Hardening + Repo-Awareness** - Idempotent comments + label management + Tier 1 (issue forms) + Tier 2 (markdown templates) live on real popular repos
+- [x] **Phase 2: Action Hardening + Repo-Awareness** - Idempotent comments + label management + Tier 1 (issue forms) + Tier 2 (markdown templates) live on real popular repos
 - [ ] **Phase 3: Benchmark + Heuristic Tuning** - Precision/recall report committed to `bench/REPORT.md` against held-out 30% with κ-audited ground truth
 - [ ] **Phase 4: LLM Adjudicator + Tier 3** - Gray-zone LLM adjudication + Tier-3 CONTRIBUTING.md extraction with kill-switch; benchmark re-run shows lift
 - [ ] **Phase 5: Demo & Submission** - Pre-recorded screencast, twin fresh-install dry-runs, resilience smoke test, polished README
@@ -67,7 +67,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 - [x] 02-04-strategies-and-format-PLAN.md — Implement IssueFormStrategy + TemplateMdStrategy; prepend to generator chain; gate META_NUDGE in format() (CHECK-06); sanitize @ in field labels
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-05-action-wiring-PLAN.md — Wire main.ts (ACT-07 inputs, ACT-08 skip-label, real loadRepoContext, label mgmt, rich core.summary report per ACT-09); rebuild dist/; sandbox E2E checkpoint
+- [x] 02-05-action-wiring-PLAN.md — Wire main.ts (ACT-07 inputs, ACT-08 skip-label, real loadRepoContext, label mgmt, rich core.summary report per ACT-09); rebuild dist/; sandbox E2E checkpoint
 
 **Cross-cutting constraints:**
 - `src/core/` must stay pure — no Octokit imports in any strategy or type file (hexagonal invariant)
@@ -130,7 +130,7 @@ Hero output (per PROJECT.md): the repo-aware missing-info checklist on every new
 | Phase                                         | Plans Complete | Status      | Completed  |
 | --------------------------------------------- | -------------- | ----------- | ---------- |
 | 1. Skeleton + Heuristic Spine + First Comment | 5/5            | Done        | 2026-05-14 |
-| 2. Action Hardening + Repo-Awareness          | 1/5            | Executing   | -          |
+| 2. Action Hardening + Repo-Awareness          | 5/5            | Done        | 2026-05-15 |
 | 3. Benchmark + Heuristic Tuning               | 0/0            | Not started | -          |
 | 4. LLM Adjudicator + Tier 3                   | 0/0            | Not started | -          |
 | 5. Demo & Submission                          | 0/0            | Not started | -          |
