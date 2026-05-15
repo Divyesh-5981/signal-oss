@@ -21,7 +21,9 @@ provides:
   - dist/index.js — rebuilt bundle containing all Phase 2 modules (1748KB)
 
 affects:
-  - Sandbox E2E (Task 4 checkpoint — awaiting human verification)
+  - Phase 3 (benchmark harness uses same score() entrypoint; loadRepoContext now wired in Action runtime)
+  - Phase 4 (main.ts orchestrator receives LLM adapter injection; gray-zone inputs already read)
+  - Phase 5 (dist/index.js committed; core.summary report is live demo material)
 
 tech-stack:
   added: []
@@ -57,10 +59,10 @@ completed: 2026-05-14
 
 ## Performance
 
-- **Duration:** ~25 min
+- **Duration:** ~25 min (Tasks 1-3) + sandbox E2E verification (Task 4)
 - **Started:** 2026-05-14T17:35:00Z
-- **Completed:** 2026-05-14T17:45:00Z
-- **Tasks:** 3 complete (Task 4 is checkpoint:human-verify — awaiting)
+- **Completed:** 2026-05-15 (sandbox E2E approved)
+- **Tasks:** 4/4 complete (including Task 4 human-verify checkpoint — APPROVED)
 - **Files created:** 2
 - **Files modified:** 4
 
@@ -88,6 +90,13 @@ completed: 2026-05-14
 - `npm run bundle` succeeded; 1748KB (Phase 1 was 1500KB — modest growth from yaml + new modules)
 - All 9 symbols verified present: `loadRepoContext`, `ensureLabel`, `applyLabel`, `removeLabel`, `writeSummary`, `IssueFormStrategy`, `TemplateMdStrategy`, `signal-oss:v1`, `signal-oss-ignore`
 
+### Task 4: Sandbox E2E — APPROVED (all 5 scenarios passed)
+- **Test 1 — Tier 1 happy path:** Low-quality issue on repo with issue form → checklist derived from required fields; `needs-info` label applied (yellow `#e4e669`); meta-nudge absent; `<!-- signal-oss:v1 -->` marker present; rich workflow summary rendered.
+- **Test 2 — Idempotency:** Close + reopen same issue → exactly 1 Signal-OSS comment (edited in place); no duplicates.
+- **Test 3 — Empty checklist → label removed:** High-quality issue covering all 7 signals → score ≥ 7; `needs-info` label removed.
+- **Test 4 — signal-oss-ignore opt-out:** Issue with `signal-oss-ignore` label → no comment posted; workflow summary shows single skip line.
+- **Test 5 — Meta-nudge on repo without templates:** Moved ISSUE_TEMPLATE dir → low-quality issue → Tier-4 baseline checklist with `**Tip:**` meta-nudge present.
+
 ## Task Commits
 
 1. **test(02-05): add failing tests for summary.ts (RED)** — `56314f6`
@@ -95,6 +104,7 @@ completed: 2026-05-14
 3. **test(02-05): add failing tests M1-M9 for main.ts rewrite (RED)** — `dcb6365`
 4. **feat(02-05): rewrite main.ts as Phase 2 orchestrator** — `72ace0c`
 5. **chore(02-05): rebuild dist/index.js with Phase 2 modules** — `c022f2b`
+6. **Task 4 — Sandbox E2E human-verify:** APPROVED (5/5 scenarios passed)
 
 ## Files Created/Modified
 
