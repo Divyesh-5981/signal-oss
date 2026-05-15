@@ -8,3 +8,8 @@ coverage/
 .vscode/
 .idea/
 *.tsbuildinfo
+.claude/
+
+# Benchmark fixtures (cached API data — reproducible via scrape)
+bench/fixtures/*/
+!bench/fixtures/.gitkeep
