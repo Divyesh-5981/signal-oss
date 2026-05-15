@@ -211,6 +211,55 @@ describe('IssueFormStrategy — generate()', () => {
     expect(items).toHaveLength(1)
     expect(items[0].text).not.toContain('@')
   })
+
+  it('A16: filters out fields when corresponding signal is satisfied', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: true,
+      hasMdTemplates: false,
+      hasContributing: false,
+      templates: [
+        {
+          filename: 'bug_report.yml',
+          type: 'form',
+          fields: ['Version', 'Steps to Reproduce', 'Error message'],
+        },
+      ],
+    }
+    const allSignals: Signals = {
+      ...ZERO_SIGNALS,
+      hasVersionMention: true,
+      hasReproKeywords: true,
+      hasStackTrace: true,
+    }
+    const items = strategy.generate('bug', allSignals, ctx)
+    expect(items).toHaveLength(0)
+  })
+
+  it('A17: only filters matched fields — unmatched fields remain', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: true,
+      hasMdTemplates: false,
+      hasContributing: false,
+      templates: [
+        {
+          filename: 'bug_report.yml',
+          type: 'form',
+          fields: ['Version', 'Browser', 'Steps to Reproduce'],
+        },
+      ],
+    }
+    const partialSignals: Signals = {
+      ...ZERO_SIGNALS,
+      hasVersionMention: true, // matches "Version"
+      // hasReproKeywords is false — "Steps to Reproduce" should remain
+    }
+    const items = strategy.generate('bug', partialSignals, ctx)
+    // "Version" filtered, "Browser" has no signal match so stays, "Steps to Reproduce" stays
+    expect(items).toHaveLength(2)
+    const texts = items.map((i) => i.text.toLowerCase())
+    expect(texts.some((t) => t.includes('browser'))).toBe(true)
+    expect(texts.some((t) => t.includes('steps to reproduce'))).toBe(true)
+  })
 })
 
 // ============================================================
@@ -277,6 +326,29 @@ describe('TemplateMdStrategy — generate()', () => {
     const items = strategy.generate('bug', ZERO_SIGNALS, ctx)
     expect(items).toHaveLength(5)
     items.forEach((i) => expect(i.text).toMatch(/^Could you share /))
+  })
+
+  it('A18: filters out fields when corresponding signal is satisfied', () => {
+    const ctx: RepoContext = {
+      hasIssueForms: false,
+      hasMdTemplates: true,
+      hasContributing: false,
+      templates: [
+        {
+          filename: 'bug_report.md',
+          type: 'md',
+          fields: ['Steps to Reproduce', 'Expected Behavior', 'Version'],
+        },
+      ],
+    }
+    const allSignals: Signals = {
+      ...ZERO_SIGNALS,
+      hasReproKeywords: true,
+      hasExpectedActual: true,
+      hasVersionMention: true,
+    }
+    const items = strategy.generate('bug', allSignals, ctx)
+    expect(items).toHaveLength(0)
   })
 })
 

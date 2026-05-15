@@ -19,6 +19,23 @@ const TYPE_KEYWORDS: Record<IssueType, string> = {
 
 const MAX_ITEMS = 5
 
+// Maps common template field labels to signal keys for filtering.
+// If a signal is true, the corresponding field is already provided — skip it.
+const FIELD_SIGNAL_MAP: Array<{ pattern: RegExp; signalKey: keyof Signals }> = [
+  { pattern: /version|environment|env|platform|os/i, signalKey: 'hasVersionMention' },
+  { pattern: /repro|steps to reproduce|how to reproduce/i, signalKey: 'hasReproKeywords' },
+  { pattern: /stack\s*trace|error\s*(message|output|log)/i, signalKey: 'hasStackTrace' },
+  { pattern: /expected|actual/i, signalKey: 'hasExpectedActual' },
+  { pattern: /code|snippet|example|minimal/i, signalKey: 'hasMinimalExample' },
+]
+
+function isFieldSatisfied(label: string, signals: Signals): boolean {
+  for (const { pattern, signalKey } of FIELD_SIGNAL_MAP) {
+    if (pattern.test(label) && signals[signalKey]) return true
+  }
+  return false
+}
+
 function sanitizeFieldLabel(label: string): string {
   return label.replace(/@/g, '(at)').trim()
 }
@@ -48,11 +65,12 @@ export class TemplateMdStrategy implements ChecklistStrategy {
     return ctx.templates.some((t) => t.type === 'md' && t.fields.length > 0)
   }
 
-  generate(type: IssueType, _signals: Signals, ctx?: RepoContext): ChecklistItem[] {
+  generate(type: IssueType, signals: Signals, ctx?: RepoContext): ChecklistItem[] {
     if (!ctx) return []
     const mds = ctx.templates.filter((t) => t.type === 'md')
     const fields = selectMdFields(type, mds)
     return fields
+      .filter((label) => !isFieldSatisfied(label, signals))
       .map((label) => ({
         text: `Could you share the ${sanitizeFieldLabel(label).toLowerCase()}?`,
       }))
