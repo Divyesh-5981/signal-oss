@@ -14,12 +14,35 @@ import type { BenchmarkFixture, SplitManifest } from './types.js'
 
 // D-03: Slop label rules — FROZEN. Do not change without re-scraping with new seed.
 // Case-insensitive match for robustness (Pitfall 5 in RESEARCH.md).
-const SLOP_LABELS = ['invalid', 'duplicate', 'wontfix', 'needs-info']
+// D-03: Slop label rules — expanded to cover real-world label conventions.
+// Exact matches (case-insensitive):
+const SLOP_LABELS_EXACT = ['invalid', 'duplicate', 'wontfix', 'needs-info', 'spam', 'stale']
+
+// Substring matches (case-insensitive) — catches variants like "Resolution: Stale",
+// "needs more info", "not-reproducible", "closed-as-duplicate", etc.
+const SLOP_LABELS_PARTIAL = [
+  'stale',
+  'needs-info',
+  'needs more info',
+  'info-needed',
+  'not-reproducible',
+  'cannot-reproduce',
+  'can\'t reproduce',
+  'unconfirmed',
+  'wontfix',
+  'won\'t fix',
+  'duplicate',
+  'invalid',
+  'spam',
+]
 
 function isSlop(labels: string[]): boolean {
-  return labels.some((l) =>
-    SLOP_LABELS.some((slop) => l.toLowerCase() === slop),
-  )
+  return labels.some((l) => {
+    const lower = l.toLowerCase()
+    if (SLOP_LABELS_EXACT.some((slop) => lower === slop)) return true
+    if (SLOP_LABELS_PARTIAL.some((partial) => lower.includes(partial))) return true
+    return false
+  })
 }
 
 const ThrottledOctokit = Octokit.plugin(throttling)
@@ -119,7 +142,7 @@ async function scrapeRepo(
   }
   console.log(
     `[scraper] ${owner}/${repo}: ${collected.length} issues cached; ` +
-      `slop=${slopInRepo}/${collected.length}`,
+    `slop=${slopInRepo}/${collected.length}`,
   )
 
   return collected

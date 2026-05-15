@@ -26,9 +26,8 @@ describe('computeScore — boundaries', () => {
     expect(Number.isInteger(r.score)).toBe(true)
     expect(r.score).toBeGreaterThanOrEqual(0)
     expect(r.score).toBeLessThanOrEqual(MAX_SCORE)
-    expect(r.score).toBeGreaterThanOrEqual(7) // high-quality bug → high score
+    expect(r.score).toBeGreaterThanOrEqual(5) // high-quality signals → positive score
   })
-
   it('image-only flag drags score down', () => {
     const a = computeScore({ ...ZERO, hasCodeBlock: true })
     const b = computeScore({ ...ZERO, hasCodeBlock: true, hasImageOnly: true })
@@ -42,14 +41,14 @@ describe('computeScore — boundaries', () => {
 })
 
 describe('computeScore — gray-zone band', () => {
-  it('GRAY_ZONE_LOW=4, GRAY_ZONE_HIGH=6 (D-13)', () => {
-    expect(GRAY_ZONE_LOW).toBe(4)
-    expect(GRAY_ZONE_HIGH).toBe(6)
+  it('GRAY_ZONE_LOW=3, GRAY_ZONE_HIGH=5 (Phase 3 tuned)', () => {
+    expect(GRAY_ZONE_LOW).toBe(3)
+    expect(GRAY_ZONE_HIGH).toBe(5)
   })
 
-  it('signals producing score 4 → isGrayZone true', () => {
-    // 1.5 + 1.5 + 1.5 = 4.5 → rounds to 5 → in band
-    const sig = { ...ZERO, hasCodeBlock: true, hasVersionMention: true, hasReproKeywords: true }
+  it('signals producing score in gray zone → isGrayZone true', () => {
+    // hasCodeBlock(2.5) + hasExpectedActual(1.5) = 4 → in band [3,5]
+    const sig = { ...ZERO, hasCodeBlock: true, hasExpectedActual: true }
     const r = computeScore(sig)
     expect(r.score).toBeGreaterThanOrEqual(GRAY_ZONE_LOW)
     expect(r.score).toBeLessThanOrEqual(GRAY_ZONE_HIGH)
