@@ -10,7 +10,7 @@ import type * as github from '@actions/github'
 
 type OctokitInstance = ReturnType<typeof github.getOctokit>
 
-export type LabelAction = 'applied' | 'removed' | 'skipped' | 'disabled' | 'dry-run'
+export type LabelAction = 'applied' | 'removed' | 'skipped' | 'error' | 'disabled' | 'dry-run'
 
 export async function ensureLabel(
   octokit: OctokitInstance,
@@ -50,7 +50,7 @@ export async function applyLabel(
   repo: string,
   issueNumber: number,
   name: string,
-): Promise<'applied' | 'skipped'> {
+): Promise<'applied' | 'error'> {
   try {
     await octokit.rest.issues.addLabels({
       owner,
@@ -61,7 +61,7 @@ export async function applyLabel(
     return 'applied'
   } catch (err: unknown) {
     core.warning(`Could not apply label "${name}": ${(err as Error).message}`)
-    return 'skipped'
+    return 'error'
   }
 }
 
@@ -71,7 +71,7 @@ export async function removeLabel(
   repo: string,
   issueNumber: number,
   name: string,
-): Promise<'removed' | 'skipped'> {
+): Promise<'removed' | 'skipped' | 'error'> {
   try {
     await octokit.rest.issues.removeLabel({
       owner,
@@ -83,9 +83,10 @@ export async function removeLabel(
   } catch (err: unknown) {
     const status = (err as { status?: number }).status
     // Pitfall 7: 404 means label wasn't on the issue — desired state already achieved
-    if (status !== 404) {
-      core.warning(`Could not remove label "${name}": ${(err as Error).message}`)
+    if (status === 404) {
+      return 'skipped'
     }
-    return 'skipped'
+    core.warning(`Could not remove label "${name}": ${(err as Error).message}`)
+    return 'error'
   }
 }
