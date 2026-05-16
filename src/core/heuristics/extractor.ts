@@ -33,7 +33,7 @@ const STACK_TRACE_PATTERNS: RegExp[] = [
   /^\s*Caused\s+by:/m,
 ]
 
-const REPRO_HEADING_REGEX = /repro|steps to|to reproduce/i
+const _REPRO_HEADING_REGEX = /repro|steps to|to reproduce/i
 const EXPECTED_REGEX = /expected/i
 const ACTUAL_REGEX = /actual/i
 

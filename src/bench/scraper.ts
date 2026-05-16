@@ -6,8 +6,8 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { Octokit } from '@octokit/rest'
 import { throttling } from '@octokit/plugin-throttling'
+import { Octokit } from '@octokit/rest'
 import pLimit from 'p-limit'
 import { seededSplit } from './metrics.js'
 import type { BenchmarkFixture, SplitManifest } from './types.js'
@@ -27,10 +27,10 @@ const SLOP_LABELS_PARTIAL = [
   'info-needed',
   'not-reproducible',
   'cannot-reproduce',
-  'can\'t reproduce',
+  "can't reproduce",
   'unconfirmed',
   'wontfix',
-  'won\'t fix',
+  "won't fix",
   'duplicate',
   'invalid',
   'spam',
@@ -63,9 +63,7 @@ export function createOctokit(token: string): InstanceType<typeof ThrottledOctok
       },
       onSecondaryRateLimit: (_retryAfter, options, octokit) => {
         // Secondary rate limit — log only; p-limit handles spacing
-        octokit.log.warn(
-          `Secondary rate limit on ${options.method} ${options.url}; backing off`,
-        )
+        octokit.log.warn(`Secondary rate limit on ${options.method} ${options.url}; backing off`)
         return false
       },
     },
@@ -83,14 +81,18 @@ async function scrapeRepo(
   const repoDir = join(fixturesDir, repoSlug)
   mkdirSync(repoDir, { recursive: true })
 
-  const collected: string[] = []  // fixture file paths (relative to fixturesDir)
+  const collected: string[] = [] // fixture file paths (relative to fixturesDir)
   console.log(`[scraper] ${owner}/${repo}: fetching up to ${maxIssues} closed issues...`)
 
   try {
-    for await (const response of octokit.paginate.iterator(
-      octokit.rest.issues.listForRepo,
-      { owner, repo, state: 'closed', per_page: 100, sort: 'updated', direction: 'desc' },
-    )) {
+    for await (const response of octokit.paginate.iterator(octokit.rest.issues.listForRepo, {
+      owner,
+      repo,
+      state: 'closed',
+      per_page: 100,
+      sort: 'updated',
+      direction: 'desc',
+    })) {
       for (const issue of response.data) {
         if (collected.length >= maxIssues) break
 
@@ -109,9 +111,7 @@ async function scrapeRepo(
           labels,
           isSlop: isSlop(labels),
           closedAt: issue.closed_at ?? new Date().toISOString(),
-          htmlUrl:
-            issue.html_url ??
-            `https://github.com/${owner}/${repo}/issues/${issue.number}`,
+          htmlUrl: issue.html_url ?? `https://github.com/${owner}/${repo}/issues/${issue.number}`,
         }
 
         const fileName = `${issue.number}.json`
@@ -138,11 +138,13 @@ async function scrapeRepo(
         readFileSync(join(fixturesDir, relPath), 'utf-8'),
       ) as BenchmarkFixture
       if (content.isSlop) slopInRepo++
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
   console.log(
     `[scraper] ${owner}/${repo}: ${collected.length} issues cached; ` +
-    `slop=${slopInRepo}/${collected.length}`,
+      `slop=${slopInRepo}/${collected.length}`,
   )
 
   return collected
@@ -150,10 +152,10 @@ async function scrapeRepo(
 
 export interface ScrapeOptions {
   token: string
-  repos: string[]          // ['microsoft/vscode', 'facebook/react', 'rust-lang/rust']
-  limitPerRepo: number     // max issues per repo (default 200; fallback 50 per D-02/BENCH-07)
-  fixturesDir: string      // absolute path to bench/fixtures/
-  seed?: number            // split seed (default 42 per D-06)
+  repos: string[] // ['microsoft/vscode', 'facebook/react', 'rust-lang/rust']
+  limitPerRepo: number // max issues per repo (default 200; fallback 50 per D-02/BENCH-07)
+  fixturesDir: string // absolute path to bench/fixtures/
+  seed?: number // split seed (default 42 per D-06)
 }
 
 export async function scrape(opts: ScrapeOptions): Promise<void> {
@@ -162,7 +164,7 @@ export async function scrape(opts: ScrapeOptions): Promise<void> {
   mkdirSync(fixturesDir, { recursive: true })
 
   const octokit = createOctokit(token)
-  const limit = pLimit(5)  // max 5 concurrent repo scrapes (CLAUDE.md recommendation)
+  const limit = pLimit(5) // max 5 concurrent repo scrapes (CLAUDE.md recommendation)
 
   const allPaths: string[] = []
 
@@ -199,20 +201,18 @@ export async function scrape(opts: ScrapeOptions): Promise<void> {
   const splitPath = join(fixturesDir, 'split.json')
   writeFileSync(splitPath, JSON.stringify(manifest, null, 2), 'utf-8')
 
-  console.log(
-    `[scraper] Done. Total=${allPaths.length} Train=${train.length} Test=${test.length}`,
-  )
+  console.log(`[scraper] Done. Total=${allPaths.length} Train=${train.length} Test=${test.length}`)
   console.log(`[scraper] Split manifest written to ${splitPath}`)
 
   // Log class distribution using top-level readFileSync import (no require())
   let slopCount = 0
   for (const p of allPaths) {
     try {
-      const f = JSON.parse(
-        readFileSync(join(fixturesDir, p), 'utf-8'),
-      ) as BenchmarkFixture
+      const f = JSON.parse(readFileSync(join(fixturesDir, p), 'utf-8')) as BenchmarkFixture
       if (f.isSlop) slopCount++
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
   console.log(
     `[scraper] Class distribution: slop=${slopCount} (${((slopCount / Math.max(allPaths.length, 1)) * 100).toFixed(1)}%) actionable=${allPaths.length - slopCount}`,

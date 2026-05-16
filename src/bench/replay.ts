@@ -12,20 +12,15 @@
 //     compute Cohen's κ between the classifier's binary prediction and the oracle's
 //     binary verdict. No manual labeling.
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
-import { join, dirname } from 'node:path'
-import { score } from '../core/index.js'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { classifyType } from '../core/classifier/issue-type.js'
+import { score } from '../core/index.js'
 import { WEIGHTS } from '../core/score/weights.js'
-import {
-  computePRF,
-  findOptimalThreshold,
-  wilsonCI,
-  cohensKappa,
-} from './metrics.js'
-import { oracle, type OracleResult } from './oracle.js'
-import type { BenchmarkFixture, ConfusionMatrix, SplitManifest } from './types.js'
 import type { Issue, IssueType, RepoContext, Signals } from '../core/types.js'
+import { cohensKappa, computePRF, findOptimalThreshold, wilsonCI } from './metrics.js'
+import { type OracleResult, oracle } from './oracle.js'
+import type { BenchmarkFixture, ConfusionMatrix, SplitManifest } from './types.js'
 
 // Canonical minimal RepoContext for benchmark — mirrors EMPTY_CTX from score-pipeline.test.ts
 // Pitfall 6 in RESEARCH.md: benchmark measures Tier-4 (universal baseline) path.
@@ -56,7 +51,7 @@ function loadFixture(path: string): BenchmarkFixture {
   if (
     typeof raw !== 'object' ||
     raw === null ||
-    typeof (raw as Record<string, unknown>)['body'] !== 'string'
+    typeof (raw as Record<string, unknown>).body !== 'string'
   ) {
     throw new Error(`Invalid fixture at ${path}: missing body field`)
   }
@@ -87,21 +82,21 @@ function sampleN<T>(arr: T[], n: number, seed: number): T[] {
   const indices = arr.map((_, i) => i)
   for (let i = indices.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1))
-    ;[indices[i], indices[j]] = [indices[j]!, indices[i]!]
+    ;[indices[i], indices[j]] = [indices[j] as number, indices[i] as number]
   }
-  return indices.slice(0, Math.min(n, arr.length)).map((i) => arr[i]!)
+  return indices.slice(0, Math.min(n, arr.length)).map((i) => arr[i as number] as T)
 }
 
 // Per-signal evidence table: how often each Signal fires on oracle-actionable vs
 // oracle-slop. Drives data-justified weight tuning.
 interface SignalEvidence {
   signal: keyof Signals
-  fires: number              // total fires in split
-  firesOnSlop: number        // fires on oracle.isSlop=true
-  firesOnActionable: number  // fires on oracle.isSlop=false
-  rateOnSlop: number         // fires-on-slop / total-slop
-  rateOnActionable: number   // fires-on-actionable / total-actionable
-  lift: number               // rateOnActionable - rateOnSlop (positive = quality signal)
+  fires: number // total fires in split
+  firesOnSlop: number // fires on oracle.isSlop=true
+  firesOnActionable: number // fires on oracle.isSlop=false
+  rateOnSlop: number // fires-on-slop / total-slop
+  rateOnActionable: number // fires-on-actionable / total-actionable
+  lift: number // rateOnActionable - rateOnSlop (positive = quality signal)
 }
 
 function buildSignalEvidence(
@@ -156,7 +151,7 @@ function printSignalEvidence(rows: SignalEvidence[]): void {
 
 export interface ReplayOptions {
   fixturesDir: string
-  split: string  // 'train' | 'test' | 'all'
+  split: string // 'train' | 'test' | 'all'
   reportPath: string
   /** PRNG seed for κ-audit sample selection (deterministic). Defaults to 42. */
   kappaSeed?: number
@@ -182,7 +177,10 @@ interface ReplayState {
   evidence: SignalEvidence[]
   kappaResult: {
     sampleSize: number
-    tp: number; fp: number; fn: number; tn: number
+    tp: number
+    fp: number
+    fn: number
+    tn: number
     kappa: number
     seed: number
   } | null
@@ -197,9 +195,7 @@ export async function replay(opts: ReplayOptions): Promise<void> {
 
   const splitManifestPath = join(fixturesDir, 'split.json')
   if (!existsSync(splitManifestPath)) {
-    throw new Error(
-      `split.json not found at ${splitManifestPath}. Run --mode scrape first.`,
-    )
+    throw new Error(`split.json not found at ${splitManifestPath}. Run --mode scrape first.`)
   }
   const manifest = JSON.parse(readFileSync(splitManifestPath, 'utf-8')) as SplitManifest
 
@@ -260,13 +256,15 @@ export async function replay(opts: ReplayOptions): Promise<void> {
     const absPath = join(fixturesDir, relPath)
     if (!existsSync(absPath)) continue
     let fx: BenchmarkFixture
-    try { fx = loadFixture(absPath) } catch { continue }
-    const o = oracle(
-      { title: fx.title, body: fx.body },
-      { slopThreshold: oracleSlopThreshold },
-    )
+    try {
+      fx = loadFixture(absPath)
+    } catch {
+      continue
+    }
+    const o = oracle({ title: fx.title, body: fx.body }, { slopThreshold: oracleSlopThreshold })
     const repo = fx.repo
-    if (!perRepoOracleDistribution[repo]) perRepoOracleDistribution[repo] = { slop: 0, actionable: 0 }
+    if (!perRepoOracleDistribution[repo])
+      perRepoOracleDistribution[repo] = { slop: 0, actionable: 0 }
     if (o.isSlop) perRepoOracleDistribution[repo].slop++
     else perRepoOracleDistribution[repo].actionable++
   }
@@ -319,10 +317,22 @@ export async function replay(opts: ReplayOptions): Promise<void> {
     const predSlop = r.predictedScore <= threshold
     const actualSlop = r.oracle.isSlop
     const cm = perTypeCM[r.issueType]
-    if (predSlop && actualSlop) { cm.tp++; overallCM.tp++ }
-    if (predSlop && !actualSlop) { cm.fp++; overallCM.fp++ }
-    if (!predSlop && actualSlop) { cm.fn++; overallCM.fn++ }
-    if (!predSlop && !actualSlop) { cm.tn++; overallCM.tn++ }
+    if (predSlop && actualSlop) {
+      cm.tp++
+      overallCM.tp++
+    }
+    if (predSlop && !actualSlop) {
+      cm.fp++
+      overallCM.fp++
+    }
+    if (!predSlop && actualSlop) {
+      cm.fn++
+      overallCM.fn++
+    }
+    if (!predSlop && !actualSlop) {
+      cm.tn++
+      overallCM.tn++
+    }
   }
 
   // Metrics print
@@ -340,7 +350,9 @@ export async function replay(opts: ReplayOptions): Promise<void> {
     const cm = perTypeCM[type]
     const n = cm.tp + cm.fp + cm.fn + cm.tn
     const prf = computePRF(cm)
-    console.log(`  ${type.padEnd(8)}: N=${n} P=${prf.precision.toFixed(3)} R=${prf.recall.toFixed(3)} F1=${prf.f1.toFixed(3)}`)
+    console.log(
+      `  ${type.padEnd(8)}: N=${n} P=${prf.precision.toFixed(3)} R=${prf.recall.toFixed(3)} F1=${prf.f1.toFixed(3)}`,
+    )
   }
 
   // Per-signal evidence (printed for train + all)
@@ -354,7 +366,10 @@ export async function replay(opts: ReplayOptions): Promise<void> {
   let kappaResult: ReplayState['kappaResult'] = null
   if (rows.length >= 30) {
     const sample = sampleN(rows, 30, kappaSeed)
-    let tp = 0, fp = 0, fn = 0, tn = 0
+    let tp = 0,
+      fp = 0,
+      fn = 0,
+      tn = 0
     for (const r of sample) {
       const classifierSlop = r.predictedScore <= threshold
       const oracleSlopVal = r.oracle.isSlop
@@ -441,7 +456,9 @@ export async function renderReport(opts: RenderReportOptions): Promise<void> {
   // when running on test; fall back to in-memory evidence on train/all.
   const evidenceForTable = trainedState?.trainEvidence ?? evidence
   const evidenceTableLabel =
-    split === 'test' ? 'Training Split (N=' + (trainedState?.trainN ?? '?') + ')' : split.toUpperCase() + ' split'
+    split === 'test'
+      ? `Training Split (N=${trainedState?.trainN ?? '?'})`
+      : `${split.toUpperCase()} split`
   const evidenceRows = evidenceForTable
     .map(
       (e) =>
@@ -451,7 +468,7 @@ export async function renderReport(opts: RenderReportOptions): Promise<void> {
 
   // Per-repo oracle distribution table
   const perRepoSrc = trainedState?.perRepoOracleDistribution ?? {}
-  const perRepoLines = Object.entries(perRepoSrc)
+  const _perRepoLines = Object.entries(perRepoSrc)
     .map(([repo, d]) => {
       const total = d.slop + d.actionable
       const pct = total > 0 ? ((d.slop / total) * 100).toFixed(1) : '0.0'
@@ -540,7 +557,7 @@ on 12/12 fixtures in pre-flight validation (see \`scripts/oracle-check.ts\`).
 **Class distribution under oracle (this split):** slop = ${oracleSlopCount} (${((oracleSlopCount / Math.max(rows.length, 1)) * 100).toFixed(1)}%),
 actionable = ${oracleActCount}.
 
-## Overall Performance (${split === 'test' ? 'Held-Out 30% Test Split' : split.toUpperCase() + ' Split'})
+## Overall Performance (${split === 'test' ? 'Held-Out 30% Test Split' : `${split.toUpperCase()} Split`})
 
 | Metric    | Value   | 95% Wilson CI                     |
 |-----------|---------|-----------------------------------|

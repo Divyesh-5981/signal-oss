@@ -28,11 +28,11 @@ import { unified } from 'unified'
 import { visit } from 'unist-util-visit'
 
 export interface OracleResult {
-  quality: number       // 0..7 — count of binary content signals present
-  isSlop: boolean       // quality < slopThreshold (default 3)
-  reasons: string[]     // each fired signal name (for transparency in REPORT.md)
-  userBodyLen: number   // length AFTER stripping HTML comments and auto-generated <details>
-  totalLen: number      // raw body length (for evidence)
+  quality: number // 0..7 — count of binary content signals present
+  isSlop: boolean // quality < slopThreshold (default 3)
+  reasons: string[] // each fired signal name (for transparency in REPORT.md)
+  userBodyLen: number // length AFTER stripping HTML comments and auto-generated <details>
+  totalLen: number // raw body length (for evidence)
 }
 
 export interface OracleConfig {
@@ -56,7 +56,7 @@ const AUTOGEN_DETAILS_SUMMARIES = [
   /a\/b\s*experiments?/i,
   /process\s*info/i,
   /workspace\s*info/i,
-  /extensions?\s*\(?\d/i,        // "Extensions (25)"
+  /extensions?\s*\(?\d/i, // "Extensions (25)"
   /traceback/i,
   /backtrace/i,
   /environment/i,
@@ -93,20 +93,22 @@ const VERSION_IN_CONTEXT =
   /\b(version|regression|release|stable|nightly|beta|since|using|installed|with|on)\s+\S*v?\d+\.\d+\b/i
 
 const STACK_FRAME_PATTERNS = [
-  /^\s+at\s+\S+/m,                          // JS/Java: "    at fn (file:1:1)"
-  /^\s*File\s+"[^"]+",\s+line\s+\d+/m,      // Python: 'File "x.py", line 3'
-  /^\s*Traceback\s*\(/m,                    // Python traceback header
-  /\berror\[E\d{2,5}\]/,                    // Rust diagnostic code
-  /^\s*panicked\s+at/m,                     // Rust panic
-  /^\s*\d+:\s+0x[0-9a-f]+\s+-/m,            // Rust backtrace frame
-  /^Exception\s+in\s+thread/m,              // Java/Kotlin exception
-  /^\s*Caused\s+by:/m,                      // JVM cause chain
+  /^\s+at\s+\S+/m, // JS/Java: "    at fn (file:1:1)"
+  /^\s*File\s+"[^"]+",\s+line\s+\d+/m, // Python: 'File "x.py", line 3'
+  /^\s*Traceback\s*\(/m, // Python traceback header
+  /\berror\[E\d{2,5}\]/, // Rust diagnostic code
+  /^\s*panicked\s+at/m, // Rust panic
+  /^\s*\d+:\s+0x[0-9a-f]+\s+-/m, // Rust backtrace frame
+  /^Exception\s+in\s+thread/m, // Java/Kotlin exception
+  /^\s*Caused\s+by:/m, // JVM cause chain
 ]
 
 function countStackFrames(text: string): number {
   let n = 0
   for (const re of STACK_FRAME_PATTERNS) {
-    const all = text.match(new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g'))
+    const all = text.match(
+      new RegExp(re.source, re.flags.includes('g') ? re.flags : `${re.flags}g`),
+    )
     if (all) n += all.length
   }
   // Also count multi-line "at " frames specifically (most common case for stacks)
@@ -133,8 +135,10 @@ const REPRO_HOST_PATTERNS = [
 // github.com links: count tree/blob/line links AND repos-as-repros (e.g.
 // github.com/gaearon/react-udv-bug/), but NOT cross-references to issues / PRs /
 // discussions in another repo (those are not minimal reproductions).
-const GITHUB_REPRO_REPO = /https?:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?(?!\/?(?:issues|pull|pulls|discussions|releases|wiki|actions|projects)\b)/i
-const GITHUB_TREE_OR_LINE = /github\.com\/[^/\s]+\/[^/\s]+\/(?:tree|blob|commit)\/|github\.com\/[^/\s]+\/[^/\s]+\/.+#L\d+/i
+const GITHUB_REPRO_REPO =
+  /https?:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?(?!\/?(?:issues|pull|pulls|discussions|releases|wiki|actions|projects)\b)/i
+const GITHUB_TREE_OR_LINE =
+  /github\.com\/[^/\s]+\/[^/\s]+\/(?:tree|blob|commit)\/|github\.com\/[^/\s]+\/[^/\s]+\/.+#L\d+/i
 
 function hasReproUrl(text: string): boolean {
   if (REPRO_HOST_PATTERNS.some((re) => re.test(text))) return true
@@ -153,19 +157,20 @@ function detectExpectedActual(headingTexts: string[], plainText: string): boolea
   if (hasExpectedHeading && hasActualHeading) return true
 
   // Labeled paragraph form: "Expected:" / "Actual:"
-  const labeledExpected = /(^|\n)\s*(\*\*)?expected\s*(behavior|behaviour|result)?\s*(\*\*)?\s*[:：]/i.test(
-    plainText,
-  )
-  const labeledActual = /(^|\n)\s*(\*\*)?(actual|current)\s*(behavior|behaviour|result)?\s*(\*\*)?\s*[:：]/i.test(
-    plainText,
-  )
+  const labeledExpected =
+    /(^|\n)\s*(\*\*)?expected\s*(behavior|behaviour|result)?\s*(\*\*)?\s*[:：]/i.test(plainText)
+  const labeledActual =
+    /(^|\n)\s*(\*\*)?(actual|current)\s*(behavior|behaviour|result)?\s*(\*\*)?\s*[:：]/i.test(
+      plainText,
+    )
   if (labeledExpected && labeledActual) return true
 
   // Prose form: "I expected X / Instead, Y" or "expected: X / instead: Y"
   const proseExpected = /\bI\s+expected\b|\bexpected\s+(to|that|behavior|result)\b/i.test(plainText)
-  const proseInstead = /\binstead[,:]?\s+(this\s+happened|I\s+(got|see|saw)|the\b)|\bbut\s+(instead|actually|got)\b|\bbut\s+I\s+(got|see|saw)\b|\bhowever\b.*\b(instead|actually)\b/i.test(
-    plainText,
-  )
+  const proseInstead =
+    /\binstead[,:]?\s+(this\s+happened|I\s+(got|see|saw)|the\b)|\bbut\s+(instead|actually|got)\b|\bbut\s+I\s+(got|see|saw)\b|\bhowever\b.*\b(instead|actually)\b/i.test(
+      plainText,
+    )
   return proseExpected && proseInstead
 }
 
@@ -187,8 +192,8 @@ function detectPlainStepList(body: string): boolean {
   for (const line of lines) {
     const trimmed = line.trim()
     if (trimmed === '') break
-    if (/^#{1,6}\s/.test(trimmed)) break          // next markdown heading ends the list
-    if (/^<\w/.test(trimmed)) break               // html block (e.g. <details>)
+    if (/^#{1,6}\s/.test(trimmed)) break // next markdown heading ends the list
+    if (/^<\w/.test(trimmed)) break // html block (e.g. <details>)
     if (trimmed.length < 3) continue
     count++
     if (count >= 3) return true
@@ -268,8 +273,8 @@ export function oracle(issue: OracleInput, config: OracleConfig = DEFAULT_CONFIG
   const sigCodeBlock = codeNodes.some((n) => {
     const content = (n.value ?? '').trim()
     if (content.length < 20) return false
-    if (/^<[^>]+>$/.test(content)) return false                  // single placeholder token
-    if (/^(<[^>]+>\s*){1,3}$/.test(content)) return false        // only placeholders
+    if (/^<[^>]+>$/.test(content)) return false // single placeholder token
+    if (/^(<[^>]+>\s*){1,3}$/.test(content)) return false // only placeholders
     return true
   })
   if (sigCodeBlock) reasons.push('code-block')
