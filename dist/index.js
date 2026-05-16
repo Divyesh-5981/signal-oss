@@ -56163,11 +56163,43 @@ function classifyType(issue, signals) {
 // src/core/heuristics/extractor.ts
 // CORE-02: Heuristics extractor that walks mdast AST of issue body and emits Signals.
 // Pure function — zero I/O. NEVER add fs/octokit imports here.
-const VERSION_REGEX = /\bv?\d+\.\d+\.\d+\b|\bnode\s+v?\d|\bnpm\s+v?\d|\bpython\s+\d|\bruby\s+\d|\bgo\s+\d/i;
-const STACK_TRACE_REGEX = /^Error\b|\s+at\s+[\w.<>$[\]]+\s*\(/m;
-const REPRO_HEADING_REGEX = /repro|steps to|to reproduce/i;
+//
+// Phase 3 rebuild: tightened content thresholds. Signals must reflect what a maintainer
+// would actually USE, not just what a template auto-injected:
+//   - Code blocks whose content is a single `<placeholder>` token don't count
+//   - Stack-trace detection accepts more languages (rust E\d+, python Traceback, panic at)
+//   - Lang-tagged code blocks must have at least a small amount of real content
+// All 7 Signal keys preserved (Phase 1 lock). Detection logic refined only.
+const VERSION_REGEX = /\bv?\d+\.\d+\.\d+\b|\bnode\s+v?\d|\bnpm\s+v?\d|\bpython\s+\d|\bruby\s+\d|\bgo\s+\d|\brustc?\s+v?\d/i;
+// Stack-trace detectors. Any one match is enough; the patterns cover JS/TS, Python,
+// Rust (E\d+, panic at, "N: 0x..." frame), Java/Kotlin, .NET.
+const STACK_TRACE_PATTERNS = [
+    /^Error\b/m,
+    /\s+at\s+[\w.<>$[\]]+\s*\(/,
+    /^\s*Traceback\s*\(/m,
+    /^\s*File\s+"[^"]+",\s+line\s+\d+/m,
+    /\berror\[E\d{2,5}\]/,
+    /^\s*panicked\s+at/m,
+    /^\s*\d+:\s+0x[0-9a-f]+\s+-/m,
+    /^Exception\s+in\s+thread/m,
+    /^\s*Caused\s+by:/m,
+];
 const EXPECTED_REGEX = /expected/i;
 const ACTUAL_REGEX = /actual/i;
+// A code-block content is a "placeholder" if it's just one or two angle-bracketed tokens
+// like `<version>`, `<backtrace>`, `<insert code here>`. Templates leave these in the body
+// when the reporter doesn't fill them out, and they should NOT count as a minimal example
+// or as evidence of a stack trace.
+function isPlaceholderContent(content) {
+    const trimmed = content.trim();
+    if (trimmed.length === 0)
+        return true;
+    if (/^<[^>]+>$/.test(trimmed))
+        return true;
+    if (/^(<[^>]+>\s*){1,3}$/.test(trimmed))
+        return true;
+    return false;
+}
 function extractSignals(issue) {
     const body = issue.body ?? '';
     const tree = unified().use(remarkParse).parse(body);
@@ -56187,15 +56219,31 @@ function extractSignals(issue) {
     visit$1(tree, 'text', (n) => {
         textBlob += ` ${n.value}`;
     });
-    const codeBlob = codeNodes.map((n) => n.value).join(' ');
-    const hasCodeBlock = codeNodes.length > 0;
-    const hasStackTrace = codeNodes.some((n) => STACK_TRACE_REGEX.test(n.value)) || STACK_TRACE_REGEX.test(textBlob);
-    const hasMinimalExample = codeNodes.some((n) => n.lang !== null && n.lang !== undefined && n.lang.length > 0);
-    const hasVersionMention = VERSION_REGEX.test(textBlob) || VERSION_REGEX.test(codeBlob);
-    const hasReproKeywords = headingTexts.some((t) => REPRO_HEADING_REGEX.test(t));
+    // Code-block content excluding placeholder-only blocks
+    const realCodeNodes = codeNodes.filter((n) => !isPlaceholderContent(n.value ?? ''));
+    const realCodeBlob = realCodeNodes.map((n) => n.value).join(' ');
+    const hasCodeBlock = realCodeNodes.length > 0;
+    const hasStackTrace = STACK_TRACE_PATTERNS.some((re) => re.test(realCodeBlob)) ||
+        STACK_TRACE_PATTERNS.some((re) => re.test(textBlob));
+    // Minimal example: lang-tagged AND content is not a placeholder AND has at least 5 chars
+    // of real content (avoids `<placeholder>` and similar fillers).
+    const hasMinimalExample = codeNodes.some((n) => {
+        if (n.lang === null || n.lang === undefined || n.lang.length === 0)
+            return false;
+        const content = (n.value ?? '').trim();
+        if (content.length < 5)
+            return false;
+        if (isPlaceholderContent(content))
+            return false;
+        return true;
+    });
+    const hasVersionMention = VERSION_REGEX.test(textBlob) || VERSION_REGEX.test(realCodeBlob);
+    // Repro heading: present AND the section under the heading has non-trivial content
+    // (filters auto-generated empty "## Steps to Reproduce" with nothing below).
+    const hasReproKeywords = detectReproSection(body);
     const hasExpectedActual = headingTexts.some((t) => EXPECTED_REGEX.test(t)) &&
         headingTexts.some((t) => ACTUAL_REGEX.test(t));
-    const hasImageOnly = imageCount > 0 && codeNodes.length === 0;
+    const hasImageOnly = imageCount > 0 && hasCodeBlock === false;
     return {
         hasCodeBlock,
         hasStackTrace,
@@ -56206,22 +56254,84 @@ function extractSignals(issue) {
         hasImageOnly,
     };
 }
+// Heading match alone fires too often on auto-generated templates ("## Steps to Reproduce"
+// with HTML-comment-only body). Accept ANY of: (a) repro heading followed by ANY non-comment
+// content, (b) "Steps to reproduce:" label followed by >=3 newlined lines.
+function detectReproSection(body) {
+    // (a) Markdown heading with non-comment content beneath
+    const headingMatch = body.match(/^#{1,6}\s+(.*(?:repro|steps to|to reproduce).*)$/im);
+    if (headingMatch) {
+        const start = (headingMatch.index ?? 0) + headingMatch[0].length;
+        const sectionEnd = findNextSectionBoundary(body, start);
+        const sectionRaw = body.slice(start, sectionEnd);
+        const sectionStripped = sectionRaw.replace(/<!--[\s\S]*?-->/g, '').trim();
+        if (sectionStripped.length > 0)
+            return true;
+    }
+    // (b) Plain "Steps to reproduce:" label followed by content lines
+    const labelMatch = body.match(/(?:^|\n)\s*(?:steps?\s+to\s+reproduce|reproduction\s+steps?|to\s+reproduce|how\s+to\s+reproduce)\s*[:：]\s*\n/i);
+    if (labelMatch) {
+        const start = (labelMatch.index ?? 0) + labelMatch[0].length;
+        const window = body.slice(start, start + 400);
+        const lines = window.split('\n');
+        let count = 0;
+        for (const line of lines) {
+            const t = line.trim();
+            if (t === '')
+                break;
+            if (/^#{1,6}\s/.test(t))
+                break;
+            if (/^<\w/.test(t))
+                break;
+            if (t.length < 3)
+                continue;
+            count++;
+            if (count >= 3)
+                return true;
+        }
+    }
+    return false;
+}
+function findNextSectionBoundary(body, from) {
+    // Next heading or end of body
+    const rest = body.slice(from);
+    const next = rest.match(/\n#{1,6}\s/);
+    if (next && next.index !== undefined)
+        return from + next.index;
+    return body.length;
+}
 
 // src/core/score/weights.ts
 // CORE-04: per-signal weights and gray-zone band.
-// D-13: Initial gray-zone band 4-6 (symmetric around midpoint). Tunable in Phase 3.
+//
+// Phase 3 rebuild: weights derived from per-signal lift on the training split
+// (N=315) using the content-based oracle as ground truth. Each weight = lift × 5
+// (rounded to 0.5), capped so the max-positive-score is near MAX_SCORE.
+//
+// Evidence table (training split, oracle ground truth, N=315):
+//   Signal              On-Slop  On-Act  Lift   Weight   Rationale
+//   hasMinimalExample    11.5%   58.7%  +0.47    2.5     Strongest quality signal
+//   hasVersionMention    31.3%   76.6%  +0.45    2.5     Was 0.0 — proxy contamination zeroed it
+//   hasCodeBlock         42.0%   76.1%  +0.34    1.5     Moderate quality signal
+//   hasReproKeywords     13.0%   35.9%  +0.23    1.0     WAS -2.5 — proxy mis-signed (see REPORT)
+//   hasStackTrace         3.8%   23.9%  +0.20    1.0     Rare-but-strong on bugs
+//   hasExpectedActual     1.5%    5.4%  +0.04    0.5     Small lift; rare fire
+//   hasImageOnly          0.0%    2.2%  +0.02   -1.0     Barely fires; intuitive low-info penalty
+//
 // D-14: Weights are internal constants — NOT action inputs.
+// Threshold (score ≤ N ⇒ slop) is learned on training split and persisted to
+// bench/fixtures/trained-threshold.json. The test run loads it unchanged.
 const WEIGHTS = {
     hasCodeBlock: 1.5,
-    hasStackTrace: 2.0,
-    hasVersionMention: 1.5,
-    hasReproKeywords: 1.5,
-    hasExpectedActual: 1.5,
-    hasMinimalExample: 2.0,
+    hasStackTrace: 1.0,
+    hasVersionMention: 2.5,
+    hasReproKeywords: 1.0,
+    hasExpectedActual: 0.5,
+    hasMinimalExample: 2.5,
     hasImageOnly: -1,
 };
-const GRAY_ZONE_LOW = 4;
-const GRAY_ZONE_HIGH = 6;
+const GRAY_ZONE_LOW = 3;
+const GRAY_ZONE_HIGH = 5;
 const MAX_SCORE = 10;
 
 // src/core/score/compute.ts

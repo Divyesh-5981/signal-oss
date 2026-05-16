@@ -42,7 +42,7 @@ const x = 1
     const issue: Issue = { title: 'crash on x', body, labels: [] }
     const r = score(issue, EMPTY_CTX, null)
     expect(r.issueType).toBe('bug')
-    expect(r.score).toBeGreaterThanOrEqual(7)
+    expect(r.score).toBeGreaterThanOrEqual(5) // tuned weights: quality signals → positive score
     expect(r.items).toHaveLength(0) // all bug items satisfied
     expect(r.isGrayZone).toBe(false)
   })
