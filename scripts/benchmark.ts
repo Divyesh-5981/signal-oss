@@ -79,24 +79,20 @@ async function run(): Promise<void> {
     void noLlm
     void split
 
-    // Stub: import replay from Plan 03 when available
-    try {
-      const { replay } = await import('../src/bench/replay.js')
-      await replay({ fixturesDir: FIXTURES_DIR, split, reportPath: REPORT_PATH })
-    } catch {
-      console.error('[benchmark] replay module not yet available — run after Plan 03')
-      process.exit(1)
+    const { replay, renderReport } = await import('../src/bench/replay.js')
+    await replay({ fixturesDir: FIXTURES_DIR, split, reportPath: REPORT_PATH })
+    // Phase 3 rebuild: REPORT.md is written from the same process so the in-memory
+    // replay state is available. Test-split run is the one that produces the final
+    // REPORT.md committed to the repo.
+    if (split === 'test' || split === 'all') {
+      await renderReport({ fixturesDir: FIXTURES_DIR, reportPath: REPORT_PATH })
     }
 
   } else if (mode === 'report') {
-    // Plan 03 implements report generation.
-    try {
-      const { renderReport } = await import('../src/bench/replay.js')
-      await renderReport({ fixturesDir: FIXTURES_DIR, reportPath: REPORT_PATH })
-    } catch {
-      console.error('[benchmark] report module not yet available — run after Plan 03')
-      process.exit(1)
-    }
+    // Backwards-compat path: re-run replay on test split, then write report.
+    const { replay, renderReport } = await import('../src/bench/replay.js')
+    await replay({ fixturesDir: FIXTURES_DIR, split: 'test', reportPath: REPORT_PATH })
+    await renderReport({ fixturesDir: FIXTURES_DIR, reportPath: REPORT_PATH })
 
   } else {
     console.error(`[benchmark] Unknown mode: ${mode}. Use: scrape | replay | report`)

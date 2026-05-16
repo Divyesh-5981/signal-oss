@@ -1,0 +1,87 @@
+{
+  "threshold": 4,
+  "trainedAt": "2026-05-16T06:44:15.236Z",
+  "trainF1": 0.7411764705882353,
+  "trainN": 315,
+  "trainSlop": 131,
+  "trainActionable": 184,
+  "trainEvidence": [
+    {
+      "signal": "hasCodeBlock",
+      "fires": 195,
+      "firesOnSlop": 55,
+      "firesOnActionable": 140,
+      "rateOnSlop": 0.4198473282442748,
+      "rateOnActionable": 0.7608695652173914,
+      "lift": 0.34102223697311657
+    },
+    {
+      "signal": "hasStackTrace",
+      "fires": 49,
+      "firesOnSlop": 5,
+      "firesOnActionable": 44,
+      "rateOnSlop": 0.03816793893129771,
+      "rateOnActionable": 0.2391304347826087,
+      "lift": 0.20096249585131098
+    },
+    {
+      "signal": "hasVersionMention",
+      "fires": 182,
+      "firesOnSlop": 41,
+      "firesOnActionable": 141,
+      "rateOnSlop": 0.31297709923664124,
+      "rateOnActionable": 0.7663043478260869,
+      "lift": 0.4533272485894457
+    },
+    {
+      "signal": "hasReproKeywords",
+      "fires": 83,
+      "firesOnSlop": 17,
+      "firesOnActionable": 66,
+      "rateOnSlop": 0.1297709923664122,
+      "rateOnActionable": 0.358695652173913,
+      "lift": 0.22892465980750082
+    },
+    {
+      "signal": "hasExpectedActual",
+      "fires": 12,
+      "firesOnSlop": 2,
+      "firesOnActionable": 10,
+      "rateOnSlop": 0.015267175572519083,
+      "rateOnActionable": 0.05434782608695652,
+      "lift": 0.03908065051443744
+    },
+    {
+      "signal": "hasMinimalExample",
+      "fires": 123,
+      "firesOnSlop": 15,
+      "firesOnActionable": 108,
+      "rateOnSlop": 0.11450381679389313,
+      "rateOnActionable": 0.5869565217391305,
+      "lift": 0.4724527049452374
+    },
+    {
+      "signal": "hasImageOnly",
+      "fires": 4,
+      "firesOnSlop": 0,
+      "firesOnActionable": 4,
+      "rateOnSlop": 0,
+      "rateOnActionable": 0.021739130434782608,
+      "lift": 0.021739130434782608
+    }
+  ],
+  "perRepoOracleDistribution": {
+    "rust-lang/rust": {
+      "slop": 44,
+      "actionable": 106
+    },
+    "microsoft/vscode": {
+      "slop": 105,
+      "actionable": 46
+    },
+    "facebook/react": {
+      "slop": 57,
+      "actionable": 93
+    }
+  }
+}

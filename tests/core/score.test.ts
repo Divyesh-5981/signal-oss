@@ -47,8 +47,8 @@ describe('computeScore — gray-zone band', () => {
   })
 
   it('signals producing score in gray zone → isGrayZone true', () => {
-    // hasCodeBlock(2.5) + hasExpectedActual(1.5) = 4 → in band [3,5]
-    const sig = { ...ZERO, hasCodeBlock: true, hasExpectedActual: true }
+    // hasVersionMention(2.5) + hasReproKeywords(1.0) = 3.5 → 4 → in band [3,5]
+    const sig = { ...ZERO, hasVersionMention: true, hasReproKeywords: true }
     const r = computeScore(sig)
     expect(r.score).toBeGreaterThanOrEqual(GRAY_ZONE_LOW)
     expect(r.score).toBeLessThanOrEqual(GRAY_ZONE_HIGH)
